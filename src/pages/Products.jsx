@@ -671,7 +671,7 @@ const IMEScanner = ({ onScan, onClose }) => {
           height: { ideal: 2160, min: 1080 },
           frameRate: { ideal: 60 },
           focusMode: 'continuous',
-          advanced: [{ torch: true }]  // Helps in low light
+          advanced: [{ torch: true }] 
         }
       });
       videoRef.current.srcObject = stream; 
