@@ -646,7 +646,7 @@ const ProductManagement = () => {
             {/* IMEIScannerModal is removed as it's replaced by the ProductSearchWithScanner */}
 
             {/* Bottom spacing for mobile navigation */}
-            <div className="h-20 lg:h-0"></div>
+            <div className="h-36 lg:h-0"></div>
           </div>
         </div>
       </div>
@@ -664,9 +664,15 @@ const IMEScanner = ({ onScan, onClose }) => {
 
   const startCamera = async () => { 
     try { 
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      }); 
+      // Update your getUserMedia constraints for better quality
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          frameRate: { ideal: 60 }
+        }
+      });
       videoRef.current.srcObject = stream; 
       
       // Start barcode scanning 
