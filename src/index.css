@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .md\:w-1\/2 {
+    width: 100%;
+  }
+  
+  .md\:flex {
+    display: none;
+  }
+}
+
+/* Custom styles for the login page */
+.bg-gradient-to-br {
+  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+}
+
