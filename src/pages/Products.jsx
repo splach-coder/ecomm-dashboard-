@@ -643,7 +643,6 @@ const ProductManagement = () => {
             {/* Modals */}
             <FilterModal />
             <AddProductModal />
-            {/* IMEIScannerModal is removed as it's replaced by the ProductSearchWithScanner */}
 
             {/* Bottom spacing for mobile navigation */}
             <div className="h-36 lg:h-0"></div>
@@ -668,9 +667,11 @@ const IMEScanner = ({ onScan, onClose }) => {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'environment',
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 60 }
+          width: { ideal: 3840, min: 1920 },
+          height: { ideal: 2160, min: 1080 },
+          frameRate: { ideal: 60 },
+          focusMode: 'continuous',
+          advanced: [{ torch: true }]  // Helps in low light
         }
       });
       videoRef.current.srcObject = stream; 
