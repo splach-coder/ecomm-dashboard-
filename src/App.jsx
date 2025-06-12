@@ -26,6 +26,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
+      <Route path="/" element={<Home />} />
       <Route 
         path="/dashboard" 
         element={
@@ -47,14 +48,6 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProductManagement />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/home" 
-        element={
-          <ProtectedRoute>
-            <Home />
           </ProtectedRoute>
         } 
       />
