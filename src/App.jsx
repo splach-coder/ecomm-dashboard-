@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProfilePage from './pages/Profile';
 import ProductManagement from './pages/Products';
+import Home from './pages/Home';
 import ResetPassword from './pages/ResetPassword';
 
 // Protected route component
@@ -46,6 +47,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProductManagement />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/home" 
+        element={
+          <ProtectedRoute>
+            <Home />
           </ProtectedRoute>
         } 
       />
