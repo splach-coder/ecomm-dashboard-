@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, BarChart3, Plus, Ticket, User, ShoppingCart, DollarSign } from 'lucide-react';
+import { Home, Plus, Ticket, User, ShoppingCart, DollarSign, MonitorSmartphone } from 'lucide-react';
+import IMEIScanner from "../IMEIScanner";
 
 const BottomNavigation = ({ activeItem }) => {
   const [showOptions, setShowOptions] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const navigate = useNavigate();
 
   const handleNavigation = (path) => {
@@ -14,8 +16,44 @@ const BottomNavigation = ({ activeItem }) => {
     setShowOptions(!showOptions);
   };
 
+  // Function to handle IMEI scanning
+  const handleIMEIScanned = (imei) => {
+    console.log("Scanned IMEI:", imei);
+    setShowScanner(false);
+    
+    // Dummy product data based on IMEI
+    const dummyProduct = {
+      id: "scan-" + imei.substring(0, 5),
+      title: `Smartphone (IMEI: ${imei})`,
+      description: "This is a smartphone scanned via IMEI barcode",
+      price: 3499.99,
+      category: "Phone",
+      brand: "Xiaomi",
+      condition: "used",
+      in_stock: 1,
+      imei: imei,
+      images: [
+        "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=600&h=600&fit=crop",
+      ],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    
+    // Navigate to product page with the product data
+    navigate('/product/' + dummyProduct.id, { state: { product: dummyProduct } });
+  };
+
   return (
     <>
+      {/* IMEI Scanner */}
+      {showScanner && (
+        <IMEIScanner
+          onScanned={handleIMEIScanned}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+      
       {/* Overlay */}
       {showOptions && (
         <div 
@@ -33,7 +71,10 @@ const BottomNavigation = ({ activeItem }) => {
           
           <div className="space-y-4">
             <button
-              onClick={() => handleNavigation('sell')}
+              onClick={() => {
+                setShowOptions(false);
+                setShowScanner(true);
+              }}
               className="w-full flex items-center gap-4 p-4 bg-green-50 hover:bg-green-100 rounded-2xl transition-colors duration-200"
             >
               <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
@@ -84,17 +125,17 @@ const BottomNavigation = ({ activeItem }) => {
 
           {/* Board */}
           <button
-            onClick={() => handleNavigation('board')}
+            onClick={() => handleNavigation('/products')}
             className={`flex flex-col items-center justify-center transition-all duration-200 group hover:scale-105`}
           >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${activeItem === 'board' ? 'bg-tumbleweed' : 'hover:bg-tumbleweed'}`}>
-              <BarChart3
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${activeItem === 'products' ? 'bg-tumbleweed' : 'hover:bg-tumbleweed'}`}>
+              <MonitorSmartphone
                 size={24}
-                className={`text-white transition-colors duration-200 ${activeItem === 'board' ? 'text-oceanblue' : 'group-hover:text-oceanblue'}`}
+                className={`text-white transition-colors duration-200 ${activeItem === 'products' ? 'text-oceanblue' : 'group-hover:text-oceanblue'}`}
                 strokeWidth={1.5}
               />
             </div>
-            <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${activeItem === 'board' ? 'text-tumbleweed' : 'text-white group-hover:text-tumbleweed'}`}>
+            <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${activeItem === 'products' ? 'text-tumbleweed' : 'text-white group-hover:text-tumbleweed'}`}>
               Board
             </span>
           </button>

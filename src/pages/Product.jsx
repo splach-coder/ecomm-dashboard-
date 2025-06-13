@@ -88,9 +88,9 @@ function AdminProductDetail({ product }) {
   const stockStatus = getStockStatus(productData.in_stock);
 
   return (
-    <article className="bg-white rounded-lg shadow-md overflow-hidden">
+    <article className="bg-white overflow-hidden">
       {/* Add back button at the top */}
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-6 border-b border-gray-100">
         <button
           onClick={() => navigate("/products")}
           className="text-sm text-oceanblue hover:underline flex items-center gap-1"
@@ -407,7 +407,7 @@ function ProductDetailDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen flex pb-24">
       {/* Sidebar for larger screens */}
       <div className="hidden lg:block">
         <Sidebar
@@ -429,7 +429,7 @@ function ProductDetailDashboard() {
       </div>
 
       <div className="flex-1">
-        <div className="container mx-auto p-6">
+        <div className="container">
           {/* Product Detail Component */}
           <AdminProductDetail product={product} />
         </div>
