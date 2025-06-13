@@ -30,7 +30,7 @@ const Sidebar = ({
     //{ id: 'Inbox', icon: Inbox, label: 'Inbox', hasNotification: true },
     //{ id: 'Transactions', icon: ArrowUpDown, label: 'Transactions' },
     { id: '/products', icon: Package, label: 'Products' },
-    //{ id: 'Apps', icon: Grid3X3, label: 'Apps' },
+    { id: '/product', icon: Grid3X3, label: 'Apps' },
     //{ id: 'Assistant', icon: Bot, label: 'Assistant' },
     { id: '/dashboard/profile', icon: Settings, label: 'Settings' }
   ];

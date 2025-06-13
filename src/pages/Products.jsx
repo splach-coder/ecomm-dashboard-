@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Plus, 
   Filter, 
@@ -8,7 +8,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Camera,
   Upload,
   DollarSign,
   FileText
@@ -16,7 +15,6 @@ import {
 import { useAuth } from '../features/auth/AuthContext';
 import Sidebar from '../components/sidebar/Sidebar';
 import BottomNavigation from '../components/bottombar/BottomNavigation';
-import { BrowserMultiFormatReader } from '@zxing/browser';
 
 const ProductManagement = () => {
   const { signOut } = useAuth();
@@ -28,7 +26,6 @@ const ProductManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
-  const [showIMEIScanner, setShowIMEIScanner] = useState(false);
   const [filters, setFilters] = useState({
     category: 'all',
     condition: 'all',
@@ -454,35 +451,6 @@ const ProductManagement = () => {
     </div>
   );
 
-  const IMEIScannerModal = () => (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity ${showIMEIScanner ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      <div className={`fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 bg-white rounded-t-2xl md:rounded-2xl md:w-[400px] transition-transform ${showIMEIScanner ? 'translate-y-0' : 'translate-y-full md:translate-y-0 md:scale-95'}`}>
-        
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-oceanblue">Scan IMEI</h2>
-          <button onClick={() => setShowIMEIScanner(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-            <X size={20} />
-          </button>
-        </div>
-        
-        <div className="p-6 text-center">
-          <div className="w-48 h-48 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-            <Camera size={48} className="text-gray-400" />
-          </div>
-          <p className="text-gray-600 mb-4">Position the IMEI barcode within the frame</p>
-          <div className="space-y-3">
-            <button className="w-full px-4 py-2 bg-tumbleweed text-white rounded-lg hover:bg-moderatelybrown">
-              Start Camera
-            </button>
-            <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-              Enter IMEI Manually
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   const Pagination = () => (
     <div className="flex items-center justify-between mt-6">
       <div className="flex items-center gap-2">
@@ -615,12 +583,21 @@ const ProductManagement = () => {
                   <span className="hidden sm:inline">Filter</span>
                 </button>
 
-                {/* Replace the search input with ProductSearchWithScanner */}
-                <ProductSearchWithScanner 
-                  onSearch={(query) => setSearchQuery(query)}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                />
+                {/* Simple Search Input */}
+                <div className="relative w-full sm:w-64">
+                  <div className="relative flex items-center">
+                    <Search className="absolute left-3 text-gray-400" size={18} />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                      }}
+                      placeholder="Search products..."
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-tumbleweed"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -654,155 +631,3 @@ const ProductManagement = () => {
 };
 
 export default ProductManagement;
-
-// IMEScanner component for real barcode scanning
-const IMEScanner = ({ onScan, onClose }) => { 
-  const videoRef = useRef(null); 
-  const [error, setError] = useState(null); 
-  const codeReader = useRef(new BrowserMultiFormatReader()); 
-
-  const startCamera = async () => { 
-    try { 
-      // Update your getUserMedia constraints for better quality
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 3840, min: 1920 },
-          height: { ideal: 2160, min: 1080 },
-          frameRate: { ideal: 60 },
-          focusMode: 'continuous',
-          advanced: [{ torch: true }] 
-        }
-      });
-      videoRef.current.srcObject = stream; 
-      
-      // Start barcode scanning 
-      codeReader.current.decodeFromVideoElement(videoRef.current, (result, error) => { 
-        if (result) { 
-          handleBarcodeDetected(result.getText()); 
-        } 
-        if (error && !(error instanceof BrowserMultiFormatReader.NotFoundException)) { 
-          console.error('Scan error:', error); 
-        } 
-      }); 
-    } catch (err) { 
-      setError(err.message || 'Could not access camera'); 
-      console.error('Camera error:', err); 
-    } 
-  }; 
-
-  const stopCamera = () => {
-    if (codeReader.current) {
-      // Check if codeReader has a stop method before calling it
-      if (typeof codeReader.current.stop === 'function') {
-        codeReader.current.stop();
-      }
-      codeReader.current = null;
-    }
-    if (videoRef.current?.srcObject) {
-      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-    }
-  }; 
-
-  const handleBarcodeDetected = (code) => { 
-    // Validate IMEI format (15-17 digits) 
-    if (/^\d{15,17}$/.test(code)) { 
-      onScan(code); 
-      stopCamera(); 
-      onClose(); 
-    } else { 
-      setError('Invalid IMEI format. Please scan a valid IMEI barcode.'); 
-    } 
-  }; 
-
-  useEffect(() => { 
-    startCamera(); 
-    return () => stopCamera(); 
-  }, []); 
-
-  return ( 
-    <div className="fixed inset-0 bg-black z-50 flex flex-col"> 
-      <button 
-        onClick={() => { 
-          stopCamera(); 
-          onClose(); 
-        }} 
-        className="absolute top-4 right-4 z-10 bg-white p-2 rounded-full" 
-      > 
-        <X size={24} /> 
-      </button> 
-      
-      <div className="flex-1 relative"> 
-        <video 
-          ref={videoRef} 
-          autoPlay 
-          playsInline 
-          muted 
-          className="w-full h-full object-cover" 
-        /> 
-        
-        {/* Scanner overlay */} 
-        <div className="absolute inset-0 flex items-center justify-center"> 
-          <div className="border-2 border-white rounded-lg w-64 h-32 relative"> 
-            <div className="absolute -top-8 left-0 right-0 text-center text-white"> 
-              Scan IMEI barcode 
-            </div> 
-          </div> 
-        </div> 
-      </div> 
-
-      {error && ( 
-        <div className="bg-red-500 text-white p-4 text-center"> 
-          {error} 
-        </div> 
-      )} 
-    </div> 
-  ); 
-}; 
-
-// ProductSearchWithScanner component for enhanced search with barcode scanning
-const ProductSearchWithScanner = ({ onSearch, searchQuery, setSearchQuery }) => { 
-  const [showScanner, setShowScanner] = useState(false); 
-  const searchInputRef = useRef(null); 
-
-  const handleScan = (imei) => { 
-    setSearchQuery(imei); 
-    onSearch(imei); 
-    setTimeout(() => { 
-      searchInputRef.current?.focus(); 
-    }, 100); 
-  }; 
-
-  return ( 
-    <div className="relative w-full sm:w-64"> 
-      {showScanner && ( 
-        <IMEScanner 
-          onScan={handleScan} 
-          onClose={() => setShowScanner(false)} 
-        /> 
-      )} 
-
-      <div className="relative flex items-center"> 
-        <Search className="absolute left-3 text-gray-400" size={18} /> 
-        <input 
-          ref={searchInputRef} 
-          type="text" 
-          value={searchQuery} 
-          onChange={(e) => { 
-            setSearchQuery(e.target.value); 
-            onSearch(e.target.value); 
-          }} 
-          placeholder="Search products or scan IMEI..." 
-          className="pl-10 pr-12 py-2 border border-gray-200 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-tumbleweed" 
-        /> 
-        <button 
-          onClick={() => setShowScanner(true)} 
-          className="absolute right-3 p-1 text-gray-600 hover:text-tumbleweed" 
-          title="Scan IMEI" 
-        > 
-          <Camera size={20} /> 
-        </button> 
-      </div> 
-    </div> 
-  ); 
-};

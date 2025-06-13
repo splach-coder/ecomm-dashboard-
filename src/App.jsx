@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProfilePage from './pages/Profile';
 import ProductManagement from './pages/Products';
+import AdminProductDetail from './pages/Product';
 import Home from './pages/Home';
 import ResetPassword from './pages/ResetPassword';
 
@@ -48,6 +49,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProductManagement />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/product" 
+        element={
+          <ProtectedRoute>
+            <AdminProductDetail />
           </ProtectedRoute>
         } 
       />
