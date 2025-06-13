@@ -13,6 +13,7 @@ import {
   Archive,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from 'react-router-dom';
 
 // AdminProductDetail Component (integrated within the dashboard)
 function AdminProductDetail({ product }) {
@@ -433,5 +434,24 @@ function ProductDetailDashboard() {
     </div>
   );
 }
+
+// Product.jsx
+const ProductDetailDashboard = () => {
+  const location = useLocation();
+  const product = location.state?.product;
+
+  if (!product) {
+    return <div>No product data available.</div>;
+  }
+
+  return (
+    <div>
+      <h1>{product.title}</h1>
+      <p>{product.description}</p>
+      <span>{product.price} MAD</span>
+      {/* Render other product details */}
+    </div>
+  );
+};
 
 export default ProductDetailDashboard;

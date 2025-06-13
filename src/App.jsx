@@ -53,7 +53,7 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/product" 
+        path="/product/:id" 
         element={
           <ProtectedRoute>
             <AdminProductDetail />

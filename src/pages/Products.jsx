@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../features/auth/AuthContext';
 import Sidebar from '../components/sidebar/Sidebar';
 import BottomNavigation from '../components/bottombar/BottomNavigation';
+import { useNavigate } from 'react-router-dom';
 
 const ProductManagement = () => {
   const { signOut } = useAuth();
@@ -32,6 +33,8 @@ const ProductManagement = () => {
     priceRange: 'all',
     brand: 'all'
   });
+
+  const navigate = useNavigate();
 
   const handleToggle = () => setIsOpen(!isOpen);
   const handleItemClick = (item) => setActiveItem(item);
@@ -172,41 +175,39 @@ const ProductManagement = () => {
     });
   };
 
-  const ProductCard = ({ product }) => (
-    <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer">
-      <div className="aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden">
-        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-          <div className="w-20 h-20 bg-gray-300 rounded-md"></div>
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <h3 className="font-semibold text-oceanblue text-sm leading-tight line-clamp-2">{product.title}</h3>
-        <div className="flex items-center justify-between text-xs text-gray-600">
-          <span>{product.category}</span>
-          <span className={`px-2 py-1 rounded-full text-xs ${
-            product.condition === 'new' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-          }`}>
-            {product.condition}
-          </span>
-        </div>
-        <p className="text-xs text-gray-500 line-clamp-2">{product.description}</p>
-        
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-lg font-bold text-tumbleweed">{product.price} MAD</span>
-          <span className="text-xs text-gray-500">Stock: {product.in_stock}</span>
-        </div>
-        {product.imei && (
-          <div className="text-xs text-gray-400">
-            IMEI: {product.imei}
+  const ProductCard = ({ product }) => {
+    const navigate = useNavigate();
+  
+    return (
+      <div 
+        className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer"
+        onClick={() => navigate(`/product/${product.id}`, { state: { product } })}
+      >
+        <div className="aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden">
+          <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+            <div className="w-20 h-20 bg-gray-300 rounded-md"></div>
           </div>
-        )}
-        <div className="text-xs text-gray-400">
-          Brand: {product.brand}
+        </div>
+        
+        <div className="space-y-2">
+          <h3 className="font-semibold text-oceanblue text-sm leading-tight line-clamp-2">{product.title}</h3>
+          <div className="flex items-center justify-between text-xs text-gray-600">
+            <span>{product.category}</span>
+            <span className={`px-2 py-1 rounded-full text-xs ${
+              product.condition === 'new' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+            }`}>
+              {product.condition}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 line-clamp-2">{product.description}</p>
+          
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-lg font-bold text-tumbleweed">{product.price} MAD</span>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const TableView = () => (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
