@@ -377,12 +377,15 @@ function ProductDetailDashboard() {
   const [userData, setUserData] = useState(null);
   const [isOpen, setIsOpen] = useState(true);
   const [activeItem, setActiveItem] = useState("products"); // Changed to 'products' since this is product detail
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Get product from location state or use default
+  const product = location.state?.product;
 
   const handleToggle = () => setIsOpen(!isOpen);
   const handleItemClick = (item) => setActiveItem(item);
   const handleLogout = () => signOut();
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -428,30 +431,11 @@ function ProductDetailDashboard() {
       <div className="flex-1">
         <div className="container mx-auto p-6">
           {/* Product Detail Component */}
-          <AdminProductDetail />
+          <AdminProductDetail product={product} />
         </div>
       </div>
     </div>
   );
 }
-
-// Product.jsx
-const ProductDetailDashboard = () => {
-  const location = useLocation();
-  const product = location.state?.product;
-
-  if (!product) {
-    return <div>No product data available.</div>;
-  }
-
-  return (
-    <div>
-      <h1>{product.title}</h1>
-      <p>{product.description}</p>
-      <span>{product.price} MAD</span>
-      {/* Render other product details */}
-    </div>
-  );
-};
 
 export default ProductDetailDashboard;
