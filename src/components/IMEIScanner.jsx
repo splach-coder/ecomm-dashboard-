@@ -31,7 +31,7 @@ const IMEIScanner = ({ onScanned, onClose }) => {
         <div className="absolute inset-0 border-4 border-dashed border-white rounded-md pointer-events-none" />
       </div>
 
-      <p className="text-white mt-6">Align the IMEI barcode inside the box</p>
+      <p className="text-white mt-6">Align the IMEI barcode inside the box {scanned}</p>
     </div>
   );
 };
