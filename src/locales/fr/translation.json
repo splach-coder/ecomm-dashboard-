@@ -13,6 +13,102 @@
     "account_settings": "Paramètres du compte",
     "manage_your_account_preferences_and_security": "Gérez les préférences et la sécurité de votre compte",
     "sign_out": "Se déconnecter",
-    "user_profile": "Profil utilisateur"
+    "user_profile": "Profil utilisateur",
+    "navigation": {
+      "home": "Accueil",
+      "products": "Produits",
+      "sales": "Ventes",
+      "profile": "Profil"
+    },
+    "titles": {
+      "loginAccount": "Connectez-vous à votre compte",
+      "createAccount": "Créer un compte",
+      "phoneStoreDashboard": "Tableau de Bord du Magasin de Téléphones",
+      "revenueByCategory": "Revenus par Catégorie",
+      "inventoryStatus": "État du Stock",
+      "keyPerformanceIndicators": "Indicateurs Clés de Performance",
+      "options": "Options",
+      "navigation": "Navigation"
+    },
+    "labels": {
+      "websiteLogo": "logo du site web",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "contactOwner": "Veuillez contacter le propriétaire",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "loginHere": "Se connecter",
+      "rememberMe": "Se souvenir de moi",
+      "forgotPassword": "Mot de passe oublié ?",
+      "resetLinkSent": "Lien de réinitialisation envoyé !",
+      "agreeToTerms": "J'accepte les",
+      "termsConditions": "Conditions Générales",
+      "processing": "Traitement en cours...",
+      "orRegisterWith": "Ou s'inscrire avec",
+      "businessOverview": "Vue d'ensemble et analyses en temps réel de l'entreprise",
+      "lastUpdated": "Dernière mise à jour",
+      "currency": "MAD",
+      "units": "unités",
+      "categoryInStock": "{{category}} en Stock",
+      "smartphone": "Smartphone",
+      "smartphoneScannedDescription": "Ceci est un smartphone scanné via code-barres IMEI",
+      "tradeProduct": "Échanger un Produit",
+      "tradeProductDescription": "Listez votre article pour l'échange",
+      "buyProduct": "Acheter un Produit",
+      "buyProductDescription": "Parcourir les articles à acheter",
+      "timeRange": {
+        "today": "Aujourd'hui",
+        "week": "Semaine",
+        "month": "Mois"
+      },
+      "categories": {
+        "Phone": "Téléphones",
+        "accessories": "Accessoires"
+      },
+      "metrics": {
+        "totalRevenue": "Chiffre d'Affaires Total",
+        "totalProfit": "Profit Total",
+        "profitMargin": "Marge Bénéficiaire",
+        "transactions": "Transactions",
+        "avgSalePrice": "Prix de Vente Moyen",
+        "avgTradeProfit": "Profit d'Échange Moyen",
+        "inventoryValue": "Valeur du Stock",
+        "totalSales": "Ventes Totales"
+      }
+    },
+    "placeholders": {
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "Email",
+      "password": "Entrez votre mot de passe"
+    },
+    "buttons": {
+      "login": "Se connecter",
+      "createAccount": "Créer un compte",
+      "continueWithGoogle": "Continuer avec Google"
+    },
+    "success": {
+      "accountCreated": "Compte créé avec succès ! Veuillez vous connecter.",
+      "resetLinkSent": "Lien de réinitialisation du mot de passe envoyé ! Vérifiez votre email.",
+      "dataRefreshed": "Données actualisées avec succès",
+      "cacheClear": "Cache vidé avec succès",
+      "productScanned": "Produit scanné avec succès",
+      "navigationSuccessful": "Navigation terminée"
+    },
+    "errors": {
+      "emailRequired": "Veuillez entrer votre adresse email",
+      "invalidEmail": "Veuillez entrer une adresse email valide",
+      "resetLinkFailed": "Échec de l'envoi du lien de réinitialisation",
+      "fetchInventoryStats": "Erreur lors de la récupération des statistiques d'inventaire:",
+      "fetchCategoryRevenue": "Erreur lors de la récupération des revenus par catégorie:",
+      "fetchData": "Erreur lors de la récupération des données:",
+      "scanFailed": "Échec du scan du produit",
+      "navigationFailed": "Échec de la navigation"
+    },
+    "messages": {
+      "loadingUserData": "Chargement des données utilisateur..."
+    },
+    "warnings": {
+      "usingMockData": "Utilisation de données fictives en raison de problèmes de connexion",
+      "cacheExpired": "Cache expiré, actualisation des données",
+      "scannerUnavailable": "Scanner temporairement indisponible"
+    }
   }
-  

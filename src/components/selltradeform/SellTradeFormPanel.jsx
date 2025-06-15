@@ -1,32 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ShoppingCart, ArrowLeftRight, User, Phone, Check, AlertCircle, DollarSign } from 'lucide-react';
+import { X, ShoppingCart, User, Phone, Check, AlertCircle, DollarSign } from 'lucide-react';
 
-const SellTradeFormPanel = ({ 
+const SellFormPanel = ({ 
   isOpen, 
   onClose, 
   onSuccess, 
   productId,
   insertSale 
 }) => {
-  const [activeTab, setActiveTab] = useState('sell');
-  const [isAnimating, setIsAnimating] = useState(false);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dragStartY, setDragStartY] = useState(null);
   const [dragCurrentY, setDragCurrentY] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   
-  // Form states
+  // Form state
   const [sellForm, setSellForm] = useState({
     fullName: '',
-    phoneNumber: ''
-  });
-  
-  const [tradeForm, setTradeForm] = useState({
-    fullName: '',
     phoneNumber: '',
-    tradeItem: '',
-    tradeDescription: ''
+    price: ''
   });
 
   const panelRef = useRef(null);
@@ -35,24 +27,11 @@ const SellTradeFormPanel = ({
   // Reset form when opening
   useEffect(() => {
     if (isOpen) {
-      setSellForm({ fullName: '', phoneNumber: '' });
-      setTradeForm({ fullName: '', phoneNumber: '', tradeItem: '', tradeDescription: '' });
-      setActiveTab('sell');
+      setSellForm({ fullName: '', phoneNumber: '', price: '' });
       setShowConfirmPopup(false);
       setIsSubmitting(false);
     }
   }, [isOpen]);
-
-  // Handle tab switching with animation
-  const handleTabSwitch = (tab) => {
-    if (tab === activeTab || isAnimating) return;
-    
-    setIsAnimating(true);
-    setTimeout(() => {
-      setActiveTab(tab);
-      setIsAnimating(false);
-    }, 150);
-  };
 
   // Touch/drag handlers for mobile swipe-to-close
   const handleTouchStart = (e) => {
@@ -84,22 +63,13 @@ const SellTradeFormPanel = ({
     setIsDragging(false);
   };
 
-  // Handle form submissions
+  // Handle form submission
   const handleSellSubmit = (e) => {
     e.preventDefault();
-    if (!sellForm.fullName.trim() || !sellForm.phoneNumber.trim()) {
+    if (!sellForm.fullName.trim() || !sellForm.phoneNumber.trim() || !sellForm.price.trim()) {
       return;
     }
     setShowConfirmPopup(true);
-  };
-
-  const handleTradeSubmit = (e) => {
-    e.preventDefault();
-    if (!tradeForm.fullName.trim() || !tradeForm.phoneNumber.trim() || !tradeForm.tradeItem.trim()) {
-      return;
-    }
-    // For now, just show success (you can implement trade logic later)
-    handleConfirmAction();
   };
 
   const handleConfirmAction = async () => {
@@ -107,20 +77,12 @@ const SellTradeFormPanel = ({
     setShowConfirmPopup(false);
     
     try {
-      const data = activeTab === 'sell' ? {
+      const data = {
         type: 'sell',
         productId,
         buyerName: sellForm.fullName,
         buyerPhone: sellForm.phoneNumber,
-        price: parseFloat(sellForm.price), // Add price to the data
-        timestamp: new Date().toISOString()
-      } : {
-        type: 'trade',
-        productId,
-        traderName: tradeForm.fullName,
-        traderPhone: tradeForm.phoneNumber,
-        tradeItem: tradeForm.tradeItem,
-        tradeDescription: tradeForm.tradeDescription,
+        price: parseFloat(sellForm.price),
         timestamp: new Date().toISOString()
       };
   
@@ -174,8 +136,11 @@ const SellTradeFormPanel = ({
 
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-oceanblue">Sell or Trade</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-oceanblue flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                Sell Product
+              </h2>
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -183,53 +148,17 @@ const SellTradeFormPanel = ({
                 <X className="w-5 h-5 text-grey" />
               </button>
             </div>
-
-            {/* Tab Buttons */}
-            <div className="flex bg-gray-100 rounded-xl p-1">
-              <button
-                onClick={() => handleTabSwitch('sell')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
-                  activeTab === 'sell' 
-                    ? 'bg-oceanblue text-white shadow-sm' 
-                    : 'text-grey hover:text-oceanblue'
-                }`}
-              >
-                <ShoppingCart className="w-4 h-4" />
-                Sell
-              </button>
-              <button
-                onClick={() => handleTabSwitch('trade')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
-                  activeTab === 'trade' 
-                    ? 'bg-tumbleweed text-white shadow-sm' 
-                    : 'text-grey hover:text-tumbleweed'
-                }`}
-              >
-                <ArrowLeftRight className="w-4 h-4" />
-                Trade
-              </button>
-            </div>
           </div>
 
           {/* Form Content */}
           <div className="p-6 overflow-y-auto">
-            {activeTab === 'sell' ? (
-              <SellForm 
-                form={sellForm}
-                setForm={setSellForm}
-                onSubmit={handleSellSubmit}
-                onCancel={onClose}
-                isSubmitting={isSubmitting}
-              />
-            ) : (
-              <TradeForm 
-                form={tradeForm}
-                setForm={setTradeForm}
-                onSubmit={handleTradeSubmit}
-                onCancel={onClose}
-                isSubmitting={isSubmitting}
-              />
-            )}
+            <SellForm 
+              form={sellForm}
+              setForm={setSellForm}
+              onSubmit={handleSellSubmit}
+              onCancel={onClose}
+              isSubmitting={isSubmitting}
+            />
           </div>
         </div>
       </div>
@@ -239,8 +168,11 @@ const SellTradeFormPanel = ({
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-oceanblue">Sell or Trade</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-oceanblue flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                Sell Product
+              </h2>
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -248,53 +180,17 @@ const SellTradeFormPanel = ({
                 <X className="w-5 h-5 text-grey" />
               </button>
             </div>
-
-            {/* Tab Buttons */}
-            <div className="flex bg-gray-100 rounded-xl p-1">
-              <button
-                onClick={() => handleTabSwitch('sell')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
-                  activeTab === 'sell' 
-                    ? 'bg-oceanblue text-white shadow-sm' 
-                    : 'text-grey hover:text-oceanblue'
-                }`}
-              >
-                <ShoppingCart className="w-4 h-4" />
-                Sell
-              </button>
-              <button
-                onClick={() => handleTabSwitch('trade')}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-all ${
-                  activeTab === 'trade' 
-                    ? 'bg-tumbleweed text-white shadow-sm' 
-                    : 'text-grey hover:text-tumbleweed'
-                }`}
-              >
-                <ArrowLeftRight className="w-4 h-4" />
-                Trade
-              </button>
-            </div>
           </div>
 
           {/* Form Content */}
           <div className="p-6 overflow-y-auto">
-            {activeTab === 'sell' ? (
-              <SellForm 
-                form={sellForm}
-                setForm={setSellForm}
-                onSubmit={handleSellSubmit}
-                onCancel={onClose}
-                isSubmitting={isSubmitting}
-              />
-            ) : (
-              <TradeForm 
-                form={tradeForm}
-                setForm={setTradeForm}
-                onSubmit={handleTradeSubmit}
-                onCancel={onClose}
-                isSubmitting={isSubmitting}
-              />
-            )}
+            <SellForm 
+              form={sellForm}
+              setForm={setSellForm}
+              onSubmit={handleSellSubmit}
+              onCancel={onClose}
+              isSubmitting={isSubmitting}
+            />
           </div>
         </div>
       </div>
@@ -310,7 +206,7 @@ const SellTradeFormPanel = ({
               <h3 className="text-lg font-bold text-oceanblue">Confirm Sale</h3>
             </div>
             <p className="text-grey mb-6">
-              Are you sure you want to sell this product to <strong>{sellForm.fullName}</strong>?
+              Are you sure you want to sell this product to <strong>{sellForm.fullName}</strong> for <strong>${sellForm.price}</strong>?
             </p>
             <div className="flex gap-3">
               <button
@@ -355,7 +251,7 @@ const SellForm = ({ form, setForm, onSubmit, onCancel, isSubmitting }) => {
       <div>
         <label className="block text-sm font-medium text-moderatelybrown mb-2">
           <User className="w-4 h-4 inline mr-2" />
-          Full Name
+          Buyer's Full Name
         </label>
         <input
           type="text"
@@ -377,7 +273,7 @@ const SellForm = ({ form, setForm, onSubmit, onCancel, isSubmitting }) => {
           value={form.phoneNumber}
           onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
           className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-oceanblue/20 focus:border-oceanblue transition-colors"
-          placeholder="Enter phone number"
+          placeholder="Enter buyer's phone number"
           required
         />
       </div>
@@ -385,14 +281,14 @@ const SellForm = ({ form, setForm, onSubmit, onCancel, isSubmitting }) => {
       <div>
         <label className="block text-sm font-medium text-moderatelybrown mb-2">
           <DollarSign className="w-4 h-4 inline mr-2" />
-          Sell Price
+          Sale Price
         </label>
         <input
           type="number"
           value={form.price}
           onChange={(e) => handleInputChange('price', e.target.value)}
           className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-oceanblue/20 focus:border-oceanblue transition-colors"
-          placeholder="Enter sell price"
+          placeholder="Enter sale price"
           required
           min="0"
           step="0.01"
@@ -409,7 +305,7 @@ const SellForm = ({ form, setForm, onSubmit, onCancel, isSubmitting }) => {
         </button>
         <button
           type="submit"
-          disabled={isSubmitting || !form.fullName.trim() || !form.phoneNumber.trim()}
+          disabled={isSubmitting || !form.fullName.trim() || !form.phoneNumber.trim() || !form.price.trim()}
           className="flex-1 bg-oceanblue hover:bg-oceanblue/90 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
           <ShoppingCart className="w-4 h-4" />
@@ -420,90 +316,4 @@ const SellForm = ({ form, setForm, onSubmit, onCancel, isSubmitting }) => {
   );
 };
 
-// Trade Form Component
-const TradeForm = ({ form, setForm, onSubmit, onCancel, isSubmitting }) => {
-  const handleInputChange = (field, value) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-  };
-
-  return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-moderatelybrown mb-2">
-          <User className="w-4 h-4 inline mr-2" />
-          Full Name
-        </label>
-        <input
-          type="text"
-          value={form.fullName}
-          onChange={(e) => handleInputChange('fullName', e.target.value)}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tumbleweed/20 focus:border-tumbleweed transition-colors"
-          placeholder="Enter your full name"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-moderatelybrown mb-2">
-          <Phone className="w-4 h-4 inline mr-2" />
-          Phone Number
-        </label>
-        <input
-          type="tel"
-          value={form.phoneNumber}
-          onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tumbleweed/20 focus:border-tumbleweed transition-colors"
-          placeholder="Enter phone number"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-moderatelybrown mb-2">
-          What are you offering?
-        </label>
-        <input
-          type="text"
-          value={form.tradeItem}
-          onChange={(e) => handleInputChange('tradeItem', e.target.value)}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tumbleweed/20 focus:border-tumbleweed transition-colors"
-          placeholder="e.g., iPhone 14 Pro, Gaming Laptop"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-moderatelybrown mb-2">
-          Description (Optional)
-        </label>
-        <textarea
-          value={form.tradeDescription}
-          onChange={(e) => handleInputChange('tradeDescription', e.target.value)}
-          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tumbleweed/20 focus:border-tumbleweed transition-colors resize-none"
-          placeholder="Describe the condition and any additional details"
-          rows="3"
-        />
-      </div>
-
-      <div className="flex gap-3 pt-4">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="flex-1 bg-gray-100 hover:bg-gray-200 text-grey font-medium py-3 px-4 rounded-lg transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting || !form.fullName.trim() || !form.phoneNumber.trim() || !form.tradeItem.trim()}
-          className="flex-1 bg-tumbleweed hover:bg-tumbleweed/90 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-        >
-          <ArrowLeftRight className="w-4 h-4" />
-          Propose Trade
-        </button>
-      </div>
-    </form>
-  );
-};
-
-export default SellTradeFormPanel;
+export default SellFormPanel;

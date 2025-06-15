@@ -18,7 +18,7 @@ const ProfilePage = () => {
   const languages = [
     { code: 'en', name: t('english'), flag: '🇺🇸' },
     { code: 'fr', name: t('français'), flag: '🇫🇷' },
-    { code: 'ar', name: t('العربية'), flag: '🇸🇦' },
+    //{ code: 'ar', name: t('العربية'), flag: '🇸🇦' },
   ];
 
   const handleToggle = () => setIsOpen(!isOpen);

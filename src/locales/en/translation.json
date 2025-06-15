@@ -13,5 +13,102 @@
     "account_settings": "Account Settings",
     "manage_your_account_preferences_and_security": "Manage your account preferences and security",
     "sign_out": "Sign Out",
-    "user_profile": "User Profile"
-  }  
+    "user_profile": "User Profile",
+    "navigation": {
+      "home": "Home",
+      "products": "Products",
+      "sales": "Sales",
+      "profile": "Profile"
+    },
+    "titles": {
+      "loginAccount": "Log in to your account",
+      "createAccount": "Create an account",
+      "phoneStoreDashboard": "Phone Store Dashboard",
+      "revenueByCategory": "Revenue by Category",
+      "inventoryStatus": "Inventory Status",
+      "keyPerformanceIndicators": "Key Performance Indicators",
+      "options": "Options",
+      "navigation": "Navigation"
+    },
+    "labels": {
+      "websiteLogo": "website logo",
+      "noAccount": "Don't have an account?",
+      "contactOwner": "Please contact the owner",
+      "haveAccount": "Already have an account?",
+      "loginHere": "Log in",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "resetLinkSent": "Reset link sent!",
+      "agreeToTerms": "I agree to the",
+      "termsConditions": "Terms & Conditions",
+      "processing": "Processing...",
+      "orRegisterWith": "Or register with",
+      "businessOverview": "Real-time business overview and analytics",
+      "lastUpdated": "Last updated",
+      "currency": "MAD",
+      "units": "units",
+      "categoryInStock": "{{category}} in Stock",
+      "smartphone": "Smartphone",
+      "smartphoneScannedDescription": "This is a smartphone scanned via IMEI barcode",
+      "tradeProduct": "Trade Product",
+      "tradeProductDescription": "List your item for trade",
+      "buyProduct": "Buy Product",
+      "buyProductDescription": "Browse items to purchase",
+      "timeRange": {
+        "today": "Today",
+        "week": "Week",
+        "month": "Month"
+      },
+      "categories": {
+        "Phone": "Phones",
+        "accessories": "Accessories"
+      },
+      "metrics": {
+        "totalRevenue": "Total Revenue",
+        "totalProfit": "Total Profit",
+        "profitMargin": "Profit Margin",
+        "transactions": "Transactions",
+        "avgSalePrice": "Avg Sale Price",
+        "avgTradeProfit": "Avg Trade Profit",
+        "inventoryValue": "Inventory Value",
+        "totalSales": "Total Sales"
+      }
+    },
+    "placeholders": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Enter your password"
+    },
+    "buttons": {
+      "login": "Log in",
+      "createAccount": "Create account",
+      "continueWithGoogle": "Continue with Google"
+    },
+    "success": {
+      "accountCreated": "Account created successfully! Please log in.",
+      "resetLinkSent": "Password reset link sent! Check your email.",
+      "dataRefreshed": "Data refreshed successfully",
+      "cacheClear": "Cache cleared successfully",
+      "productScanned": "Product scanned successfully",
+      "navigationSuccessful": "Navigation completed"
+    },
+    "errors": {
+      "emailRequired": "Please enter your email address",
+      "invalidEmail": "Please enter a valid email address",
+      "resetLinkFailed": "Failed to send reset link",
+      "fetchInventoryStats": "Error fetching inventory stats:",
+      "fetchCategoryRevenue": "Error fetching category revenue:",
+      "fetchData": "Error fetching data:",
+      "scanFailed": "Failed to scan product",
+      "navigationFailed": "Navigation failed"
+    },
+    "messages": {
+      "loadingUserData": "Loading user data..."
+    },
+    "warnings": {
+      "usingMockData": "Using mock data due to connection issues",
+      "cacheExpired": "Cache expired, refreshing data",
+      "scannerUnavailable": "Scanner temporarily unavailable"
+    }
+  }

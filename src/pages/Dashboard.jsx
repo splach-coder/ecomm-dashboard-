@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../features/auth/AuthContext";
 import Sidebar from "../components/sidebar/Sidebar";
 import BottomNavigation from "../components/bottombar/BottomNavigation";
@@ -107,6 +108,7 @@ const mockTrades = [
 ];
 
 function Dashboard() {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const [userData, setUserData] = useState(null);
   const [isOpen, setIsOpen] = useState(true);
@@ -144,7 +146,7 @@ function Dashboard() {
 
       setInventoryStats(stats);
     } catch (error) {
-      console.error('Error fetching inventory stats:', error);
+      console.error(t('errors.fetchInventoryStats'), error);
       // Fallback to mock data calculation
       const mockStats = mockProducts.reduce((acc, product) => {
         const category = product.category;
@@ -241,7 +243,7 @@ function Dashboard() {
 
       setCategoryRevenue(combinedRevenue);
     } catch (error) {
-      console.error('Error fetching category revenue:', error);
+      console.error(t('errors.fetchCategoryRevenue'), error);
       // Fallback to mock data calculation
       const mockCategoryRevenue = {
         phones: 150,
@@ -300,7 +302,7 @@ function Dashboard() {
       await fetchInventoryStats();
       await fetchCategoryRevenue();
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error(t('errors.fetchData'), error);
       // Fallback to mock data
       setProducts(mockProducts);
       setSells(mockSells);
@@ -453,7 +455,7 @@ function Dashboard() {
   if (!userData) {
     return (
       <div className="flex items-center justify-center h-screen">
-        Loading user data...
+        {t('messages.loadingUserData')}
       </div>
     );
   }
@@ -488,11 +490,11 @@ function Dashboard() {
             {/* Header */}
             <div className="flex flex-col md:flex-row items-center justify-between mb-8">
               <div className="mb-6 lg:mb-0">
-                <h1 className="text-3xl font-bold text-oceanblue">
-                  Phone Store Dashboard
+                <h1 className="text-2xl lg:text-3xl font-bold text-oceanblue">
+                  {t('titles.phoneStoreDashboard')}
                 </h1>
                 <p className="text-grey mt-2">
-                  Real-time business overview and analytics
+                  {t('labels.businessOverview')}
                 </p>
               </div>
 
@@ -509,7 +511,7 @@ function Dashboard() {
                           : "text-grey hover:text-oceanblue hover:bg-fog/10"
                       }`}
                     >
-                      {range}
+                      {t(`labels.timeRange.${range}`)}
                     </button>
                   ))}
                 </div>
@@ -529,31 +531,31 @@ function Dashboard() {
 
             {/* Last Update */}
             <div className="text-right text-sm text-grey mb-6">
-              Last updated: {lastUpdate.toLocaleTimeString()}
+              {t('labels.lastUpdated')}: {lastUpdate.toLocaleTimeString()}
             </div>
 
             {/* Main Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <StatCard
-                title="Total Revenue"
-                value={`${metrics.totalRevenue.toLocaleString()} MAD`}
+                title={t('labels.metrics.totalRevenue')}
+                value={`${metrics.totalRevenue.toLocaleString()} ${t('labels.currency')}`}
                 icon={DollarSign}
                 color="bg-tumbleweed"
               />
               <StatCard
-                title="Total Profit"
-                value={`${metrics.totalProfit.toLocaleString()} MAD`}
+                title={t('labels.metrics.totalProfit')}
+                value={`${metrics.totalProfit.toLocaleString()} ${t('labels.currency')}`}
                 icon={TrendingUp}
                 color="bg-oceanblue"
               />
               <StatCard
-                title="Profit Margin"
+                title={t('labels.metrics.profitMargin')}
                 value={`${metrics.profitMargin.toFixed(1)}%`}
                 icon={ArrowUpRight}
                 color="bg-tumbleweed"
               />
               <StatCard
-                title="Transactions"
+                title={t('labels.metrics.transactions')}
                 value={metrics.totalTransactions}
                 icon={Package}
                 color="bg-fog"
@@ -563,20 +565,20 @@ function Dashboard() {
             {/* Secondary Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <StatCard
-                title="Avg Sale Price"
-                value={`${metrics.avgSalePrice.toFixed(0)} MAD`}
+                title={t('labels.metrics.avgSalePrice')}
+                value={`${metrics.avgSalePrice.toFixed(0)} ${t('labels.currency')}`}
                 icon={DollarSign}
                 color="bg-moderatelybrown"
               />
               <StatCard
-                title="Avg Trade Profit"
-                value={`${metrics.avgTradeProfit.toFixed(0)} MAD`}
+                title={t('labels.metrics.avgTradeProfit')}
+                value={`${metrics.avgTradeProfit.toFixed(0)} ${t('labels.currency')}`}
                 icon={TrendingUp}
                 color="bg-tumbleweed"
               />
               <StatCard
-                title="Inventory Value"
-                value={`${metrics.inventoryValue.toLocaleString()} MAD`}
+                title={t('labels.metrics.inventoryValue')}
+                value={`${metrics.inventoryValue.toLocaleString()} ${t('labels.currency')}`}
                 icon={Package}
                 color="bg-oceanblue"
               />
@@ -586,7 +588,7 @@ function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <div className="bg-white p-6 rounded-lg shadow-md border border-fog/20">
                 <h3 className="text-lg font-semibold text-oceanblue mb-4">
-                  Revenue by Category
+                  {t('titles.revenueByCategory')}
                 </h3>
                 <div className="space-y-4">
                   {Object.entries(categoryRevenue).map(([category, revenue]) => (
@@ -597,10 +599,10 @@ function Dashboard() {
                         ) : (
                           <Package className="w-5 h-5 text-fog mr-2" />
                         )}
-                        <span className="text-grey capitalize">{category}</span>
+                        <span className="text-grey capitalize">{t(`labels.categories.${category}`)}</span>
                       </div>
                       <span className="font-semibold text-oceanblue">
-                        {Number(revenue).toLocaleString()} MAD
+                        {Number(revenue).toLocaleString()} {t('labels.currency')}
                       </span>
                     </div>
                   ))}
@@ -609,7 +611,7 @@ function Dashboard() {
 
               <div className="bg-white p-6 rounded-lg shadow-md border border-fog/20">
                 <h3 className="text-lg font-semibold text-oceanblue mb-4">
-                  Inventory Status
+                  {t('titles.inventoryStatus')}
                 </h3>
                 <div className="space-y-4">
                   {Object.entries(inventoryStats).map(([category, stock]) => (
@@ -620,10 +622,10 @@ function Dashboard() {
                         ) : (
                           <Package className="w-5 h-5 text-fog mr-2" />
                         )}
-                        <span className="text-grey capitalize">{category} in Stock</span>
+                        <span className="text-grey capitalize">{t('labels.categoryInStock', { category: t(`labels.categories.${category}`) })}</span>
                       </div>
                       <span className="font-semibold text-oceanblue">
-                        {stock} units
+                        {stock} {t('labels.units')}
                       </span>
                     </div>
                   ))}
@@ -634,32 +636,32 @@ function Dashboard() {
             {/* Performance Indicators */}
             <div className="bg-white p-6 rounded-lg shadow-md border border-fog/20">
               <h3 className="text-lg font-semibold text-oceanblue mb-4">
-                Key Performance Indicators
+                {t('titles.keyPerformanceIndicators')}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-tumbleweed/10 rounded-lg">
                   <p className="text-tumbleweed font-bold text-2xl">
-                    {metrics.totalRevenue.toLocaleString()} MAD
+                    {metrics.totalRevenue.toLocaleString()} {t('labels.currency')}
                   </p>
-                  <p className="text-grey text-sm">Total Revenue</p>
+                  <p className="text-grey text-sm">{t('labels.metrics.totalRevenue')}</p>
                 </div>
                 <div className="text-center p-4 bg-oceanblue/10 rounded-lg">
                   <p className="text-oceanblue font-bold text-2xl">
                     {metrics.profitMargin.toFixed(1)}%
                   </p>
-                  <p className="text-grey text-sm">Profit Margin</p>
+                  <p className="text-grey text-sm">{t('labels.metrics.profitMargin')}</p>
                 </div>
                 <div className="text-center p-4 bg-fog/10 rounded-lg">
                   <p className="text-fog font-bold text-2xl">
                     {metrics.totalTransactions}
                   </p>
-                  <p className="text-grey text-sm">Total Sales</p>
+                  <p className="text-grey text-sm">{t('labels.metrics.totalSales')}</p>
                 </div>
                 <div className="text-center p-4 bg-moderatelybrown/10 rounded-lg">
                   <p className="text-moderatelybrown font-bold text-2xl">
-                    {metrics.inventoryValue.toLocaleString()} MAD
+                    {metrics.inventoryValue.toLocaleString()} {t('labels.currency')}
                   </p>
-                  <p className="text-grey text-sm">Inventory Value</p>
+                  <p className="text-grey text-sm">{t('labels.metrics.inventoryValue')}</p>
                 </div>
               </div>
             </div>

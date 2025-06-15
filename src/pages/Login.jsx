@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import supabase from "../lib/supabaseClient";
 import GridMotion from "../components/animations/GridMotion";
 
 function Login() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -79,7 +81,7 @@ function Login() {
         // Show success message or automatically log in
         setIsLogin(true);
         setError({
-          message: "Account created successfully! Please log in.",
+          message: t('success.accountCreated'),
           type: "success",
         });
       }
@@ -117,13 +119,13 @@ function Login() {
     console.log("handled");
 
     if (!email) {
-      setError({ message: "Please enter your email address", type: "error" });
+      setError({ message: t('errors.emailRequired'), type: "error" });
       return;
     }
 
     if (!validateEmail(email)) {
       setError({
-        message: "Please enter a valid email address",
+        message: t('errors.invalidEmail'),
         type: "error",
       });
       return;
@@ -143,12 +145,12 @@ function Login() {
 
       setResetSent(true);
       setError({
-        message: "Password reset link sent! Check your email.",
+        message: t('success.resetLinkSent'),
         type: "success",
       });
     } catch (error) {
       setError({
-        message: error.message || "Failed to send reset link",
+        message: error.message || t('errors.resetLinkFailed'),
         type: "error",
       });
     } finally {
@@ -171,34 +173,34 @@ function Login() {
           <div className={`w-full h-auto flex justify-center`}>
             <img
               src={"images/logo.png"}
-              alt={"website logo"}
+              alt={t('labels.websiteLogo')}
               className="w-[150px] h-auto object-contain"
             />
           </div>
           <h1 className="text-3xl font-bold text-oceanblue mb-2 text-center">
-            {isLogin ? "Log in to your account" : "Create an account"}
+            {isLogin ? t('titles.loginAccount') : t('titles.createAccount')}
           </h1>
 
           {isLogin && (
             <p className="text-gray-600 mb-8 text-center">
-              Don't have an account?{" "}
+              {t('labels.noAccount')}{" "}
               <button
                 //onClick={() => setIsLogin(false)}
                 className="text-fog font-medium hover:underline"
               >
-                Please contact the owner
+                {t('labels.contactOwner')}
               </button>
             </p>
           )}
 
           {!isLogin && (
             <p className="text-gray-600 mb-8 text-center">
-              Already have an account?{" "}
+              {t('labels.haveAccount')}{" "}
               <button
                 onClick={() => setIsLogin(true)}
                 className="text-fog font-medium hover:underline"
               >
-                Log in
+                {t('labels.loginHere')}
               </button>
             </p>
           )}
@@ -221,7 +223,7 @@ function Login() {
                 <div>
                   <input
                     type="text"
-                    placeholder="First name"
+                    placeholder={t('placeholders.firstName')}
                     className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-fog"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
@@ -231,7 +233,7 @@ function Login() {
                 <div>
                   <input
                     type="text"
-                    placeholder="Last name"
+                    placeholder={t('placeholders.lastName')}
                     className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-fog"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
@@ -244,7 +246,7 @@ function Login() {
             <div>
               <input
                 type="email"
-                placeholder="Email"
+                placeholder={t('placeholders.email')}
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-fog"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -255,7 +257,7 @@ function Login() {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
+                placeholder={t('placeholders.password')}
                 className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-fog"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -320,7 +322,7 @@ function Login() {
                     htmlFor="remember-me"
                     className="ml-2 block text-sm text-gray-700"
                   >
-                    Remember me
+                    {t('labels.rememberMe')}
                   </label>
                 </div>
 
@@ -330,11 +332,11 @@ function Login() {
                     onClick={handleResetPassword}
                     className="text-sm text-fog hover:underline"
                   >
-                    Forgot password?
+                    {t('labels.forgotPassword')}
                   </button>
                 ) : (
                   <span className="text-sm text-green-600">
-                    Reset link sent!
+                    {t('labels.resetLinkSent')}
                   </span>
                 )}
               </div>
@@ -352,9 +354,9 @@ function Login() {
                   htmlFor="terms"
                   className="ml-2 block text-sm text-gray-700"
                 >
-                  I agree to the{" "}
+                  {t('labels.agreeToTerms')}{" "}
                   <a href="#" className="text-fog hover:underline">
-                    Terms & Conditions
+                    {t('labels.termsConditions')}
                   </a>
                 </label>
               </div>
@@ -366,10 +368,10 @@ function Login() {
               disabled={loading}
             >
               {loading
-                ? "Processing..."
+                ? t('labels.processing')
                 : isLogin
-                ? "Log in"
-                : "Create account"}
+                ? t('buttons.login')
+                : t('buttons.createAccount')}
             </button>
 
             <div className="relative py-3">
@@ -378,7 +380,7 @@ function Login() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  Or register with
+                  {t('labels.orRegisterWith')}
                 </span>
               </div>
             </div>
@@ -416,7 +418,7 @@ function Login() {
                     />
                   </g>
                 </svg>
-                Continue with Google
+                {t('buttons.continueWithGoogle')}
               </button>
             </div>
           </form>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Home, Plus, ArrowLeftRight, User, ShoppingCart, DollarSign, MonitorSmartphone } from 'lucide-react';
 import IMEIScanner from "../IMEIScanner";
 
@@ -7,6 +8,7 @@ const BottomNavigation = ({ activeItem }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -24,8 +26,8 @@ const BottomNavigation = ({ activeItem }) => {
     // Dummy product data based on IMEI
     const dummyProduct = {
       id: "scan-" + imei.substring(0, 5),
-      title: `Smartphone (IMEI: ${imei})`,
-      description: "This is a smartphone scanned via IMEI barcode",
+      title: `${t('labels.smartphone')} (IMEI: ${imei})`,
+      description: t('labels.smartphoneScannedDescription'),
       price: 3499.99,
       category: "Phone",
       brand: "Xiaomi",
@@ -78,8 +80,8 @@ const BottomNavigation = ({ activeItem }) => {
                 <DollarSign size={24} className="text-white" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-gray-800">Trade Product</h3>
-                <p className="text-sm text-gray-600">List your item for trade</p>
+                <h3 className="font-semibold text-gray-800">{t('labels.tradeProduct')}</h3>
+                <p className="text-sm text-gray-600">{t('labels.tradeProductDescription')}</p>
               </div>
             </button>
 
@@ -91,8 +93,8 @@ const BottomNavigation = ({ activeItem }) => {
                 <ShoppingCart size={24} className="text-white" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-gray-800">Buy Product</h3>
-                <p className="text-sm text-gray-600">Browse items to purchase</p>
+                <h3 className="font-semibold text-gray-800">{t('labels.buyProduct')}</h3>
+                <p className="text-sm text-gray-600">{t('labels.buyProductDescription')}</p>
               </div>
             </button>
           </div>
@@ -116,7 +118,7 @@ const BottomNavigation = ({ activeItem }) => {
               />
             </div>
             <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${activeItem === 'home' ? 'text-tumbleweed' : 'text-white group-hover:text-tumbleweed'}`}>
-              Home
+              {t('navigation.home')}
             </span>
           </button>
 
@@ -133,7 +135,7 @@ const BottomNavigation = ({ activeItem }) => {
               />
             </div>
             <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${activeItem === 'products' ? 'text-tumbleweed' : 'text-white group-hover:text-tumbleweed'}`}>
-              Products
+              {t('navigation.products')}
             </span>
           </button>
 
@@ -166,7 +168,7 @@ const BottomNavigation = ({ activeItem }) => {
               />
             </div>
             <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${activeItem === 'sales' ? 'text-tumbleweed' : 'text-white group-hover:text-tumbleweed'}`}>
-              Sales
+              {t('navigation.sales')}
             </span>
           </button>
 
@@ -183,7 +185,7 @@ const BottomNavigation = ({ activeItem }) => {
               />
             </div>
             <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${activeItem === 'profile' ? 'text-tumbleweed' : 'text-white group-hover:text-tumbleweed'}`}>
-              Profile
+              {t('navigation.profile')}
             </span>
           </button>
 
