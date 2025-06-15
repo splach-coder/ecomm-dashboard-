@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(5);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
