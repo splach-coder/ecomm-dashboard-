@@ -190,7 +190,7 @@ const AddProductModal = ({ showAddModal, setShowAddModal }) => {
                       : "text"
                   }
                   required
-                  value={form[name] || (name === "in_stock" ? 1 : "")}
+                  value={form[name]}
                   onChange={handleChange}
                   className="peer block w-full px-3 pt-6 pb-1 border rounded focus:outline-none focus:ring"
                   placeholder=" "
