@@ -37,12 +37,20 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   return (
     <Routes>
       <Route
         path="/login"
-        element={user ? <Navigate to="/dashboard" /> : <Login />}
+        element={
+          loading ? (
+            <div>Loading...</div>
+          ) : user ? (
+            <Navigate to="/dashboard" />
+          ) : (
+            <Login />
+          )
+        }
       />
       <Route path="/" element={<Home />} />
       <Route
