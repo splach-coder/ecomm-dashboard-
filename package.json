@@ -14,11 +14,15 @@
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "gsap": "^3.13.0",
+    "i18next": "^25.2.1",
     "lucide-react": "^0.513.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-i18next": "^15.5.3",
     "react-qr-barcode-scanner": "^2.1.6",
-    "react-router-dom": "^7.6.2"
+    "react-router-dom": "^7.6.2",
+    "react-toastify": "^11.0.5",
+    "tailwindcss-rtl": "^0.9.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

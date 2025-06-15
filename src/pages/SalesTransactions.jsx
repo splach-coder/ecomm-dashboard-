@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { fetchSalesWithProduct } from "../features/updateProductStock";
+import { fetchSalesWithProduct, fetchTradesWithProducts } from "../features/updateProductStock";
 import { useAuth } from '../features/auth/AuthContext';
 import Sidebar from '../components/sidebar/Sidebar';
 import BottomNavigation from '../components/bottombar/BottomNavigation';
@@ -8,6 +8,7 @@ const SalesTransactions = () => {
   const { user, signOut } = useAuth();
   const [startDate, setStartDate] = useState('');
   const [sales, setSales] = useState([]);
+  const [trades, setTrades] = useState([]);
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -42,11 +43,32 @@ const SalesTransactions = () => {
   };
 
   useEffect(() => {
-    async function loadSales() {
+    async function loadTransactions() {
       setIsLoading(true);
       try {
-        const data = await fetchSalesWithProduct();
-        setSales(data);
+        const [salesData, tradesData] = await Promise.all([
+          fetchSalesWithProduct(),
+          fetchTradesWithProducts()
+        ]);
+        
+        setSales(salesData);
+        
+        // Transform trades to match sales format for display
+        const formattedTrades = tradesData.map(trade => ({
+          id: trade.id,
+          type: 'trade',
+          product_id: trade.new_product_id,
+          product: trade.new_product, // The product given to the client
+          sell_price: trade.new_product_price, // The price of the new product
+          original_price: trade.new_product.price, // Original price of the new product
+          profit: trade.profit, // Already calculated in the trade
+          buyer_name: trade.buyer_name || 'Trade Customer',
+          buyer_phone: trade.buyer_phone || 'N/A',
+          created_at: trade.created_at,
+          trade_details: trade // Keep all trade details for the modal
+        }));
+        
+        setTrades(formattedTrades);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -54,51 +76,58 @@ const SalesTransactions = () => {
       }
     }
 
-    loadSales();
+    loadTransactions();
   }, []);
 
-  // Calculate profit
-  const calculateProfit = (sellPrice, originalPrice) => {
-    return sellPrice - originalPrice;
-  };
+  // Combine sales and trades for display
+  const allTransactions = useMemo(() => {
+    return [...sales, ...trades].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }, [sales, trades]);
 
-  // Filter sales based on date range
-  const filteredSales = useMemo(() => {
-    if (!startDate && !endDate) return sales;
+  // Filter transactions based on date range
+  const filteredTransactions = useMemo(() => {
+    if (!startDate && !endDate) return allTransactions;
     
-    return sales.filter(sale => {
-      const saleDate = new Date(sale.created_at);
+    return allTransactions.filter(transaction => {
+      const transactionDate = new Date(transaction.created_at);
       const start = startDate ? new Date(startDate) : null;
       const end = endDate ? new Date(endDate) : null;
       
       if (start && end) {
-        return saleDate >= start && saleDate <= end;
+        return transactionDate >= start && transactionDate <= end;
       } else if (start) {
-        return saleDate >= start;
+        return transactionDate >= start;
       } else if (end) {
-        return saleDate <= end;
+        return transactionDate <= end;
       }
       return true;
     });
-  }, [sales, startDate, endDate]);
+  }, [allTransactions, startDate, endDate]);
 
   // Calculate totals
   const totals = useMemo(() => {
-    return filteredSales.reduce((acc, sale) => {
-      const profit = calculateProfit(sale.sell_price, sale.product.price);
+    return filteredTransactions.reduce((acc, transaction) => {
+      const profit = transaction.type === 'trade' 
+        ? transaction.profit 
+        : transaction.sell_price - transaction.product.price;
+      
       return {
-        totalSales: acc.totalSales + sale.sell_price,
+        totalSales: acc.totalSales + transaction.sell_price,
         totalProfit: acc.totalProfit + profit,
         count: acc.count + 1
       };
     }, { totalSales: 0, totalProfit: 0, count: 0 });
-  }, [filteredSales]);
+  }, [filteredTransactions]);
 
-  const handleViewSale = (sale) => {
-    const profit = calculateProfit(sale.sell_price, sale.product.price);
+  const handleViewSale = (transaction) => {
+    const profit = transaction.type === 'trade' 
+      ? transaction.profit 
+      : transaction.sell_price - transaction.product.price;
+    
     setSelectedSale({
-      ...sale,
-      profit: profit
+      ...transaction,
+      profit: profit,
+      isTrade: transaction.type === 'trade'
     });
     setShowModal(true);
   };
@@ -184,7 +213,7 @@ const SalesTransactions = () => {
         <div className="container mx-auto p-4 lg:p-6">
           {/* Header */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 className="text-2xl font-bold text-oceanblue mb-4">Sales Transactions</h1>
+            <h1 className="text-2xl font-bold text-oceanblue mb-4">Sales & Trade Transactions</h1>
             
             {/* Date Range Filter */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -227,7 +256,7 @@ const SalesTransactions = () => {
 
             {/* Results count */}
             <div className="text-sm text-gray-500">
-              Showing {filteredSales.length} of {sales.length} transactions
+              Showing {filteredTransactions.length} of {allTransactions.length} transactions
             </div>
           </div>
 
@@ -315,7 +344,7 @@ const SalesTransactions = () => {
           </div>
 
           {/* Transactions Table */}
-          {filteredSales.length === 0 ? (
+          {filteredTransactions.length === 0 ? (
             <div className="bg-white rounded-lg shadow-md p-8 text-center">
               <svg
                 className="mx-auto h-12 w-12 text-gray-400"
@@ -333,8 +362,8 @@ const SalesTransactions = () => {
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">No transactions</h3>
               <p className="mt-1 text-sm text-gray-500">
-                {sales.length === 0
-                  ? "You haven't made any sales yet."
+                {allTransactions.length === 0
+                  ? "You haven't made any transactions yet."
                   : "No transactions match your selected date range."}
               </p>
             </div>
@@ -360,52 +389,60 @@ const SalesTransactions = () => {
                       Profit
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredSales.map((sale) => {
-                    const profit = calculateProfit(sale.sell_price, sale.product.price);
+                  {filteredTransactions.map((transaction) => {
+                    const profit = transaction.type === 'trade' 
+                      ? transaction.profit 
+                      : transaction.sell_price - transaction.product.price;
                     const isProfit = profit >= 0;
 
                     return (
-                      <tr key={sale.id} className="hover:bg-gray-50">
+                      <tr key={transaction.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
                               <img
                                 className="h-10 w-10 rounded-md object-cover"
-                                src={`${sale.product.images[0]}`}
-                                alt={sale.product.title}
+                                src={`${transaction.product.images[0]}`}
+                                alt={transaction.product.title}
                                 onError={(e) => {
                                   e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
                                 }}
                               />
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{sale.product.title}</div>
-                              <div className="text-sm text-gray-500">SKU: {sale.product.sku || 'N/A'}</div>
+                              <div className="text-sm font-medium text-gray-900">{transaction.product.title}</div>
+                              <div className="text-sm text-gray-500">SKU: {transaction.product.sku || 'N/A'}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {sale.buyer_name}
+                          {transaction.buyer_name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(sale.created_at)}
+                          {formatDate(transaction.created_at)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {sale.sell_price.toFixed(2)} MAD
+                          {transaction.sell_price.toFixed(2)} MAD
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isProfit ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                             {isProfit ? '+' : ''}{profit.toFixed(2)} MAD
                           </span>
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {transaction.type === 'trade' ? 'Trade' : 'Sale'}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
-                            onClick={() => handleViewSale(sale)}
+                            onClick={() => handleViewSale(transaction)}
                             className="text-blue-600 hover:text-blue-900"
                           >
                             View
@@ -419,22 +456,24 @@ const SalesTransactions = () => {
 
               {/* Mobile List */}
               <div className="lg:hidden divide-y divide-gray-200">
-                {filteredSales.map((sale) => {
-                  const profit = calculateProfit(sale.sell_price, sale.product.price);
+                {filteredTransactions.map((transaction) => {
+                  const profit = transaction.type === 'trade' 
+                    ? transaction.profit 
+                    : transaction.sell_price - transaction.product.price;
                   const isProfit = profit >= 0;
 
                   return (
                     <div 
-                      key={sale.id} 
+                      key={transaction.id} 
                       className="p-4 hover:bg-gray-50 active:bg-gray-100"
-                      onClick={() => handleViewSale(sale)}
+                      onClick={() => handleViewSale(transaction)}
                     >
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-16 w-16">
                           <img
                             className="h-16 w-16 rounded-md object-cover"
-                            src={`${sale.product.images[0]}`}
-                            alt={sale.product.title}
+                            src={`${transaction.product.images[0]}`}
+                            alt={transaction.product.title}
                             onError={(e) => {
                               e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
                             }}
@@ -443,8 +482,9 @@ const SalesTransactions = () => {
                         <div className="ml-4 flex-1">
                           <div className="flex justify-between">
                             <div>
-                              <div className="text-sm font-medium text-gray-900 line-clamp-1">{sale.product.title}</div>
-                              <div className="text-xs text-gray-500">{formatDate(sale.created_at)}</div>
+                              <div className="text-sm font-medium text-gray-900 line-clamp-1">{transaction.product.title}</div>
+                              <div className="text-xs text-gray-500">{formatDate(transaction.created_at)}</div>
+                              <div className="text-xs text-gray-500">{transaction.type === 'trade' ? 'Trade' : 'Sale'}</div>
                             </div>
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isProfit ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                               {isProfit ? '+' : ''}{profit.toFixed(2)} MAD
@@ -473,7 +513,9 @@ const SalesTransactions = () => {
               <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
               <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Sale Details</h3>
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                    {selectedSale.isTrade ? 'Trade Details' : 'Sale Details'}
+                  </h3>
                   <div className="grid grid-cols-1 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Product</label>
@@ -492,6 +534,32 @@ const SalesTransactions = () => {
                         </div>
                       </div>
                     </div>
+                    
+                    {selectedSale.isTrade && selectedSale.trade_details && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Traded Product</label>
+                        <div className="mt-1 flex items-center">
+                          {selectedSale.trade_details.old_product ? (
+                            <>
+                              <img
+                                className="h-16 w-16 rounded-md object-cover mr-4"
+                                src={`${selectedSale.trade_details.old_product.images[0]}`}
+                                alt={selectedSale.trade_details.old_product.title}
+                                onError={(e) => {
+                                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
+                                }}
+                              />
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{selectedSale.trade_details.old_product.title}</p>
+                                <p className="text-sm text-gray-500">Buyback Price: {selectedSale.trade_details.buyback_price.toFixed(2)} MAD</p>
+                              </div>
+                            </>
+                          ) : (
+                            <p className="text-sm text-gray-500">No product details available</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Buyer Information</label>
@@ -520,6 +588,22 @@ const SalesTransactions = () => {
                             {selectedSale.profit >= 0 ? '+' : ''}{selectedSale.profit.toFixed(2)} MAD
                           </p>
                         </div>
+                        {selectedSale.isTrade && selectedSale.trade_details && (
+                          <>
+                            <div>
+                              <p className="text-sm text-gray-500">User Paid</p>
+                              <p className="text-sm font-medium text-gray-900">
+                                {selectedSale.trade_details.user_paid.toFixed(2)} MAD
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Trade Value</p>
+                              <p className="text-sm font-medium text-gray-900">
+                                {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
+                              </p>
+                            </div>
+                          </>
+                        )}
                         <div>
                           <p className="text-sm text-gray-500">Date</p>
                           <p className="text-sm font-medium text-gray-900">{formatDateTime(selectedSale.created_at)}</p>
@@ -557,7 +641,9 @@ const SalesTransactions = () => {
                   <div className="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
                     <div className="flex-1 py-6 overflow-y-auto px-4 sm:px-6">
                       <div className="flex items-start justify-between">
-                        <h2 className="text-lg font-medium text-gray-900">Sale Details</h2>
+                        <h2 className="text-lg font-medium text-gray-900">
+                          {selectedSale.isTrade ? 'Trade Details' : 'Sale Details'}
+                        </h2>
                         <button
                           type="button"
                           className="-mr-2 p-2 text-gray-400 hover:text-gray-500"
@@ -591,6 +677,32 @@ const SalesTransactions = () => {
                               </div>
                             </div>
 
+                            {selectedSale.isTrade && selectedSale.trade_details && (
+                              <div className="border-t border-gray-200 pt-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Traded Product</label>
+                                <div className="flex items-center">
+                                  {selectedSale.trade_details.old_product ? (
+                                    <>
+                                      <img
+                                        className="h-20 w-20 rounded-md object-cover mr-4"
+                                        src={`${selectedSale.trade_details.old_product.images[0]}`}
+                                        alt={selectedSale.trade_details.old_product.title}
+                                        onError={(e) => {
+                                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
+                                        }}
+                                      />
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-900">{selectedSale.trade_details.old_product.title}</p>
+                                        <p className="text-sm text-gray-500">Buyback Price: {selectedSale.trade_details.buyback_price.toFixed(2)} MAD</p>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <p className="text-sm text-gray-500">No product details available</p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
                             <div className="border-t border-gray-200 pt-4">
                               <label className="block text-sm font-medium text-gray-700 mb-2">Buyer Information</label>
                               <div className="space-y-2">
@@ -618,6 +730,22 @@ const SalesTransactions = () => {
                                     {selectedSale.profit >= 0 ? '+' : ''}{selectedSale.profit.toFixed(2)} MAD
                                   </p>
                                 </div>
+                                {selectedSale.isTrade && selectedSale.trade_details && (
+                                  <>
+                                    <div>
+                                      <p className="text-xs text-gray-500">User Paid</p>
+                                      <p className="text-sm font-medium text-gray-900">
+                                        {selectedSale.trade_details.user_paid.toFixed(2)} MAD
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <p className="text-xs text-gray-500">Trade Value</p>
+                                      <p className="text-sm font-medium text-gray-900">
+                                        {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
+                                      </p>
+                                    </div>
+                                  </>
+                                )}
                                 <div>
                                   <p className="text-xs text-gray-500">Date</p>
                                   <p className="text-sm font-medium text-gray-900">{formatDateTime(selectedSale.created_at)}</p>

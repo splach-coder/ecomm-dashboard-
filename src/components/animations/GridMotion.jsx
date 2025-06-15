@@ -9,7 +9,7 @@ const GridMotion = ({ items = [], gradientColor = 'black' }) => {
   // Create array of local images (1.jpeg to 10.jpeg) cycling to fill 28 items
   const localImages = Array.from({ length: 28 }, (_, index) => {
     const imageNumber = (index % 10) + 1;
-    return `./images/${imageNumber}.jpeg`;
+    return `images/${imageNumber}.jpeg`;
   });
   
   // Use local images as default items
@@ -53,7 +53,7 @@ const GridMotion = ({ items = [], gradientColor = 'black' }) => {
   }, []);
 
   return (
-    <div ref={gridRef} className="h-full w-full overflow-hidden">
+    <div ref={gridRef} className="h-full w-full overflow-hidden p-1">
       <section
         className="w-full h-screen overflow-hidden relative flex items-center justify-center"
         style={{
@@ -80,7 +80,7 @@ const GridMotion = ({ items = [], gradientColor = 'black' }) => {
                     <div
                       className="relative w-full h-full overflow-hidden rounded-[10px] bg-[#111] flex items-center justify-center text-white text-[1.5rem]"
                     >
-                      {typeof content === 'string' && content.startsWith('./images/') ? (
+                      {typeof content === 'string' && content.startsWith('images/') ? (
                         <div
                           className="w-full h-full bg-cover bg-center absolute top-0 left-0"
                           style={{ backgroundImage: `url(${content})` }}

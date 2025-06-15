@@ -34,6 +34,7 @@ const ProductManagement = () => {
     condition: "all",
     priceRange: "all",
     brand: "all",
+    stockStatus: "in_stock", // Default to in stock
   });
   const navigate = useNavigate();
 
@@ -64,6 +65,11 @@ const ProductManagement = () => {
   const brands = ["all", "Apple","Samsung","Google","Huawei","Xiaomi","OnePlus","Sony",
   "LG","Nokia","Oppo","Vivo","Motorola","Asus","HTC","Lenovo"
 ];
+  const stockStatuses = [
+    { label: "In Stock", value: "in_stock" },
+    { label: "Out of Stock", value: "out_of_stock" },
+    { label: "All", value: "all" },
+  ];
   const priceRanges = [
     { label: "All Prices", value: "all" },
     { label: "Under 500 MAD", value: "0-500" },
@@ -86,6 +92,14 @@ const ProductManagement = () => {
     const matchesBrand =
       filters.brand === "all" || product.brand === filters.brand;
 
+    // Stock status filter
+    const matchesStockStatus = (() => {
+      if (filters.stockStatus === "all") return true;
+      if (filters.stockStatus === "in_stock") return product.in_stock > 0;
+      if (filters.stockStatus === "out_of_stock") return product.in_stock === 0;
+      return true;
+    })();
+
     let matchesPrice = true;
     if (filters.priceRange !== "all") {
       const [min, max] = filters.priceRange
@@ -104,6 +118,7 @@ const ProductManagement = () => {
       matchesCategory &&
       matchesCondition &&
       matchesBrand &&
+      matchesStockStatus &&
       matchesPrice
     );
   });
@@ -121,6 +136,7 @@ const ProductManagement = () => {
       condition: "all",
       priceRange: "all",
       brand: "all",
+      stockStatus: "in_stock", // Reset to default in stock
     });
   };
 
@@ -169,6 +185,17 @@ const ProductManagement = () => {
             <span className="text-lg font-bold text-tumbleweed">
               {product.price} MAD
             </span>
+            <div className="flex items-center gap-1">
+              <span
+                className={`px-2 py-1 rounded-full text-xs ${
+                  product.in_stock > 0
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {product.in_stock > 0 ? `${product.in_stock} in stock` : "Out of stock"}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -251,7 +278,17 @@ const ProductManagement = () => {
                 <td className="p-4 font-semibold text-tumbleweed">
                   {product.price} MAD
                 </td>
-                <td className="p-4 text-gray-700">{product.in_stock}</td>
+                <td className="p-4">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      product.in_stock > 0
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {product.in_stock > 0 ? `${product.in_stock} in stock` : "Out of stock"}
+                  </span>
+                </td>
                 <td className="p-4 text-gray-700">{product.imei || "-"}</td>
               </tr>
             ))}
@@ -284,6 +321,25 @@ const ProductManagement = () => {
           </div>
 
           <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-oceanblue mb-2">
+                Stock Status
+              </label>
+              <select
+                value={filters.stockStatus}
+                onChange={(e) =>
+                  setFilters({ ...filters, stockStatus: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tumbleweed"
+              >
+                {stockStatuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-oceanblue mb-2">
                 Category

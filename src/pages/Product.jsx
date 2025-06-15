@@ -17,15 +17,199 @@ import {
   Archive,
   ShoppingCart,
   Edit3,
+  Copy,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+
+// Copy Product Modal Component
+function CopyProductModal({ show, onClose, product, onCopySuccess }) {
+  const [copyCount, setCopyCount] = useState(1);
+  const [imeiInputs, setImeiInputs] = useState(['']);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Reset inputs when modal opens/closes
+  useEffect(() => {
+    if (show) {
+      setCopyCount(1);
+      setImeiInputs(['']);
+    }
+  }, [show]);
+
+  // Update IMEI inputs when count changes
+  useEffect(() => {
+    const newInputs = Array(copyCount).fill('').map((_, index) => 
+      imeiInputs[index] || ''
+    );
+    setImeiInputs(newInputs);
+  }, [copyCount]);
+
+  const handleCopyCountChange = (value) => {
+    const count = Math.max(1, Math.min(10, parseInt(value) || 1)); // Limit between 1-10
+    setCopyCount(count);
+  };
+
+  const handleImeiChange = (index, value) => {
+    const newInputs = [...imeiInputs];
+    newInputs[index] = value;
+    setImeiInputs(newInputs);
+  };
+
+  const generateProductId = () => {
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    return `PRD-${timestamp}-${random}`;
+  };
+
+  const handleCopyProducts = async () => {
+    setIsLoading(true);
+    try {
+      // Validate IMEI inputs
+      const emptyImeis = imeiInputs.some(imei => !imei.trim());
+      if (emptyImeis) {
+        alert('Please fill all IMEI codes');
+        setIsLoading(false);
+        return;
+      }
+
+      // Check for duplicate IMEIs
+      const uniqueImeis = new Set(imeiInputs.map(imei => imei.trim()));
+      if (uniqueImeis.size !== imeiInputs.length) {
+        alert('IMEI codes must be unique');
+        setIsLoading(false);
+        return;
+      }
+
+      // Create product copies
+      const productCopies = imeiInputs.map((imei, index) => ({
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        category: product.category,
+        brand: product.brand,
+        condition: product.condition,
+        in_stock: 1,
+        images: product.images,
+        imei: imei.trim(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }));
+
+      // Insert into Supabase
+      const { error } = await supabase
+        .from('products')
+        .insert(productCopies);
+
+      if (error) {
+        console.error('Error copying products:', error);
+        alert('Failed to copy products. Please try again.');
+        return;
+      }
+
+      alert(`Successfully created ${copyCount} product copies!`);
+      onCopySuccess();
+      onClose();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred while copying products.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 lg:items-center">
+      <div className="bg-white w-full max-w-md rounded-t-xl lg:rounded-xl max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-oceanblue">Copy Product</h3>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded"
+            disabled={isLoading}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Product Info */}
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <h4 className="font-medium text-sm text-gray-700 mb-1">Copying:</h4>
+            <p className="text-sm text-gray-600">{product.title}</p>
+          </div>
+
+          {/* Copy Count */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Number of Copies
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={copyCount}
+              onChange={(e) => handleCopyCountChange(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-oceanblue focus:border-transparent"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* IMEI Inputs */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              IMEI Codes
+            </label>
+            <div className="space-y-2">
+              {imeiInputs.map((imei, index) => (
+                <div key={index}>
+                  <input
+                    type="text"
+                    placeholder={`IMEI Code ${index + 1}`}
+                    value={imei}
+                    onChange={(e) => handleImeiChange(index, e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-oceanblue focus:border-transparent"
+                    disabled={isLoading}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-200 p-4 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            disabled={isLoading}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleCopyProducts}
+            disabled={isLoading}
+            className="flex-1 px-4 py-2 bg-oceanblue hover:bg-oceanblue/90 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Copying...' : `Copy ${copyCount} Products`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // AdminProductDetail Component (integrated within the dashboard)
 function AdminProductDetail({ product }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
   const [showSellForm, setShowSellForm] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
 
   // Default product data for demo purposes
   const defaultProduct = {
@@ -48,18 +232,32 @@ function AdminProductDetail({ product }) {
     updated_at: "2025-06-13T14:30:00Z",
   };
 
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const productData = product || defaultProduct;
 
-  // When you want to open the modal for a product:
+  // Check if product is out of stock
+  const isOutOfStock = productData.in_stock <= 0;
+
+  // Action button handlers
+  const handleSell = () => {
+    // Check if product is out of stock
+    if (isOutOfStock) {
+      alert('Cannot sell product - Out of stock!');
+      return;
+    }
+    setShowSellForm(true);
+  };
+
   const handleModify = () => {
     setShowUpdateModal(true);
   };
 
-  const productData = product || defaultProduct;
+  const handleCopy = () => {
+    setShowCopyModal(true);
+  };
 
-  // Action button handlers
-  const handleSell = () => {
-    setShowSellForm(true);
+  const handleCopySuccess = () => {
+    // Refresh the page or update the product list
+    window.location.reload(); // Simple refresh - you might want to implement a more sophisticated update
   };
 
   async function insertSale(data) {
@@ -142,6 +340,13 @@ function AdminProductDetail({ product }) {
         />
       )}
 
+      <CopyProductModal
+        show={showCopyModal}
+        onClose={() => setShowCopyModal(false)}
+        product={productData}
+        onCopySuccess={handleCopySuccess}
+      />
+
       {/* Add back button at the top */}
       <div className="p-6 border-b border-gray-100">
         <button
@@ -152,6 +357,7 @@ function AdminProductDetail({ product }) {
           Back to Products
         </button>
       </div>
+
       {/* Mobile/Tablet Layout */}
       <div className="lg:hidden">
         {/* Image Gallery - Mobile */}
@@ -238,20 +444,33 @@ function AdminProductDetail({ product }) {
           </div>
 
           {/* Action Buttons - Mobile */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-2 pt-2">
             <button
               onClick={handleSell}
-              className="flex-1 bg-oceanblue hover:bg-oceanblue/90 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              disabled={isOutOfStock}
+              className={`flex-1 font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                isOutOfStock 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-oceanblue hover:bg-oceanblue/90 text-white'
+              }`}
+              title={isOutOfStock ? 'Product is out of stock' : 'Sell Product'}
             >
               <ShoppingCart className="w-5 h-5" />
-              Sell Product
+              {isOutOfStock ? 'Out of Stock' : 'Sell Product'}
             </button>
             <button
               onClick={handleModify}
-              className="flex-1 bg-tumbleweed hover:bg-tumbleweed/90 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="bg-tumbleweed hover:bg-tumbleweed/90 text-white font-medium py-3 px-3 rounded-lg transition-colors flex items-center justify-center"
+              title="Modify Product"
             >
               <Edit3 className="w-5 h-5" />
-              Modify
+            </button>
+            <button
+              onClick={handleCopy}
+              className="bg-fog hover:bg-fog/90 text-white font-medium py-3 px-3 rounded-lg transition-colors flex items-center justify-center"
+              title="Copy Product"
+            >
+              <Copy className="w-5 h-5" />
             </button>
           </div>
 
@@ -292,6 +511,7 @@ function AdminProductDetail({ product }) {
           </div>
         </section>
       </div>
+
       {/* Desktop Layout */}
       <div className="hidden lg:block">
         <div className="grid grid-cols-5 gap-6 p-6">
@@ -385,17 +605,30 @@ function AdminProductDetail({ product }) {
             <div className="flex gap-4">
               <button
                 onClick={handleSell}
-                className="bg-oceanblue hover:bg-oceanblue/90 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center gap-2 shadow-sm hover:shadow-md"
+                disabled={isOutOfStock}
+                className={`font-semibold py-3 px-6 rounded-lg transition-colors flex items-center gap-2 shadow-sm hover:shadow-md ${
+                  isOutOfStock 
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                    : 'bg-oceanblue hover:bg-oceanblue/90 text-white'
+                }`}
+                title={isOutOfStock ? 'Product is out of stock' : 'Sell Product'}
               >
                 <ShoppingCart className="w-5 h-5" />
-                Sell Product
+                {isOutOfStock ? 'Out of Stock' : 'Sell Product'}
               </button>
               <button
                 onClick={handleModify}
-                className="bg-tumbleweed hover:bg-tumbleweed/90 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center gap-2 shadow-sm hover:shadow-md"
+                className="bg-tumbleweed hover:bg-tumbleweed/90 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-sm hover:shadow-md"
+                title="Modify Product"
               >
                 <Edit3 className="w-5 h-5" />
-                Modify Product
+              </button>
+              <button
+                onClick={handleCopy}
+                className="bg-fog hover:bg-fog/90 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-sm hover:shadow-md"
+                title="Copy Product"
+              >
+                <Copy className="w-5 h-5" />
               </button>
             </div>
 

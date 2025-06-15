@@ -54,4 +54,73 @@ async function fetchSalesWithProduct() {
   return data;
 }
 
-export {updateProductStock, fetchSalesWithProduct}
+async function fetchTradesWithProducts() {
+  // First fetch all trades with product details
+  const { data: trades, error: tradesError } = await supabase
+    .from("trades")
+    .select(`
+      id,
+      buyback_price,
+      new_product_price,
+      user_paid,
+      profit,
+      created_at,
+      old_product_id,
+      new_product:new_product_id (
+        id,
+        title,
+        price,
+        images
+      )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (tradesError) throw tradesError;
+
+  // Get all product IDs involved in trades (both old and new)
+  const productIds = trades.flatMap(trade => [
+    trade.old_product_id,
+    trade.new_product.id
+  ]).filter(Boolean);
+
+  // Fetch all sells related to these products
+  const { data: sells, error: sellsError } = await supabase
+    .from("sells")
+    .select(`
+      id,
+      product_id,
+      buyer_name,
+      buyer_phone
+    `)
+    .in("product_id", productIds);
+
+  if (sellsError) throw sellsError;
+
+  // Create a map of product_id to sell data for quick lookup
+  const sellsMap = sells.reduce((map, sell) => {
+    map[sell.product_id] = sell;
+    return map;
+  }, {});
+
+  // Combine the data
+  return trades.map(trade => ({
+    id: trade.id,
+    old_product_id: trade.old_product_id,
+    new_product_id: trade.new_product.id,
+    buyback_price: trade.buyback_price,
+    new_product_price: trade.new_product_price,
+    user_paid: trade.user_paid,
+    profit: trade.profit,
+    created_at: trade.created_at,
+    buyer_name: sellsMap[trade.new_product.id]?.buyer_name || 'Trade Customer',
+    buyer_phone: sellsMap[trade.new_product.id]?.buyer_phone || 'N/A',
+    old_product: trade.old_product_id ? {
+      id: trade.old_product_id,
+      // We don't have the old product details unless we fetch them
+      // You might want to add another query to fetch these if needed
+    } : null,
+    new_product: trade.new_product
+  }));
+}
+
+export {updateProductStock, fetchSalesWithProduct, fetchTradesWithProducts}

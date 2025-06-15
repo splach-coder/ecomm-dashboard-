@@ -22,6 +22,7 @@ const Sidebar = ({
     { id: "/dashboard", icon: Home, label: "Dashboard" },
     { id: "/products", icon: Package, label: "Products" },
     { id: "/sales", icon: Grid3X3, label: "Sales" },
+    { id: "/trade", icon: Grid3X3, label: "Trade" },
     { id: "/profile", icon: Settings, label: "Settings" },
   ];
 
