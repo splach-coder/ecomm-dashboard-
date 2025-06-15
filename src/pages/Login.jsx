@@ -27,6 +27,12 @@ function Login() {
     checkUser();
   }, [navigate]);
 
+  useEffect(() => {
+    if (performance.navigation.type === 1) {
+      navigate("/login", { replace: true });
+    }
+  }, []);
+
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
