@@ -35,7 +35,6 @@ function Dashboard() {
         <Sidebar 
           isOpen={isOpen} 
           onToggle={handleToggle} 
-          activeItem={activeItem} 
           onItemClick={handleItemClick} 
           onLogout={handleLogout} 
         />

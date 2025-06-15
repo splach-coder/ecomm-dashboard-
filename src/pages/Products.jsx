@@ -13,8 +13,9 @@ import {
   FileText,
 } from "lucide-react";
 import { useAuth } from "../features/auth/AuthContext";
-import supabase from '../lib/supabaseClient';
+import supabase from "../lib/supabaseClient";
 import Sidebar from "../components/sidebar/Sidebar";
+import AddProductModal from "../components/AddProductModal";
 import BottomNavigation from "../components/bottombar/BottomNavigation";
 import { useNavigate } from "react-router-dom";
 
@@ -43,8 +44,11 @@ const ProductManagement = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data, error } = await supabase.from("products").select("*");
-      console.log(data)
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
       if (error) {
         console.error("Error fetching products:", error.message);
       } else {
@@ -55,97 +59,11 @@ const ProductManagement = () => {
     fetchProducts();
   }, []);
 
-  // Mock data with IMEI field
-  const mockProducts = [
-    {
-      id: "1",
-      title: "Xiaomi Monitor 27 Inch",
-      description: "High-quality 4K monitor with excellent color accuracy",
-      price: 2500,
-      category: "Monitor",
-      brand: "Xiaomi",
-      condition: "new",
-      in_stock: 15,
-      imei: null,
-      images: ["/api/placeholder/280/200"],
-      created_at: "2024-01-15",
-      updated_at: "2024-01-15",
-    },
-    {
-      id: "2",
-      title: "Xiaomi 14T",
-      description: "Latest smartphone with advanced camera system",
-      price: 4500,
-      category: "Phone",
-      brand: "Xiaomi",
-      condition: "new",
-      in_stock: 8,
-      imei: "123456789012345",
-      images: ["/api/placeholder/280/200"],
-      created_at: "2024-01-16",
-      updated_at: "2024-01-16",
-    },
-    {
-      id: "3",
-      title: "Xiaomi 14T Pro",
-      description: "Premium smartphone with pro features",
-      price: 5200,
-      category: "Phone",
-      brand: "Xiaomi",
-      condition: "new",
-      in_stock: 5,
-      imei: "234567890123456",
-      images: ["/api/placeholder/280/200"],
-      created_at: "2024-01-17",
-      updated_at: "2024-01-17",
-    },
-    {
-      id: "4",
-      title: "Philips Monitor 24Inch",
-      description: "Professional monitor for office use",
-      price: 1400,
-      category: "Monitor",
-      brand: "Philips",
-      condition: "used",
-      in_stock: 3,
-      imei: null,
-      images: ["/api/placeholder/280/200"],
-      created_at: "2024-01-18",
-      updated_at: "2024-01-18",
-    },
-    {
-      id: "5",
-      title: "Samsung Galaxy A35",
-      description: "Mid-range smartphone with great battery life",
-      price: 2740,
-      category: "Phone",
-      brand: "Samsung",
-      condition: "new",
-      in_stock: 12,
-      imei: "345678901234567",
-      images: ["/api/placeholder/280/200"],
-      created_at: "2024-01-19",
-      updated_at: "2024-01-19",
-    },
-    {
-      id: "6",
-      title: "iPhone Case Premium",
-      description: "Premium protective case for iPhone",
-      price: 150,
-      category: "Accessory",
-      brand: "Apple",
-      condition: "new",
-      in_stock: 50,
-      imei: null,
-      images: ["/api/placeholder/280/200"],
-      created_at: "2024-01-20",
-      updated_at: "2024-01-20",
-    },
-  ];
-
   const categories = ["all", "Phone", "Monitor", "Accessory"];
   const conditions = ["all", "new", "used"];
-  const brands = ["all", "Xiaomi", "Samsung", "Apple", "Philips"];
+  const brands = ["all", "Apple","Samsung","Google","Huawei","Xiaomi","OnePlus","Sony",
+  "LG","Nokia","Oppo","Vivo","Motorola","Asus","HTC","Lenovo"
+];
   const priceRanges = [
     { label: "All Prices", value: "all" },
     { label: "Under 500 MAD", value: "0-500" },
@@ -218,7 +136,12 @@ const ProductManagement = () => {
       >
         <div className="aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden">
           <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-            <div className="w-20 h-20 bg-gray-300 rounded-md"></div>
+            <img
+              src={`${product.images[0]}`}
+              alt={`${product.title}`}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
           </div>
         </div>
 
@@ -293,7 +216,14 @@ const ProductManagement = () => {
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <div className="w-8 h-8 bg-gray-300 rounded"></div>
+                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <img
+                          src={`${product.images[0]}`}
+                          alt={`${product.title}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
                     </div>
                     <div>
                       <p className="font-medium text-oceanblue">
@@ -450,181 +380,6 @@ const ProductManagement = () => {
     </div>
   );
 
-  const AddProductModal = () => (
-    <div
-      className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity ${
-        showAddModal ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
-    >
-      <div
-        className={`fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 bg-white rounded-t-2xl md:rounded-2xl md:w-[700px] md:max-h-[90vh] transition-transform ${
-          showAddModal
-            ? "translate-y-0"
-            : "translate-y-full md:translate-y-0 md:scale-95"
-        }`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-oceanblue">
-            Add New Product
-          </h2>
-          <button
-            onClick={() => setShowAddModal(false)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-6 overflow-y-auto max-h-[60vh] md:max-h-[70vh]">
-          <form className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-oceanblue mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tumbleweed"
-                  placeholder="Enter product title"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-oceanblue mb-2">
-                  IMEI (for phones)
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tumbleweed"
-                  placeholder="Enter IMEI number"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-oceanblue mb-2">
-                <FileText size={16} className="inline mr-1" />
-                Description
-              </label>
-              <textarea
-                rows={3}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tumbleweed"
-                placeholder="Enter product description"
-              ></textarea>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-oceanblue mb-2">
-                  <DollarSign size={16} className="inline mr-1" />
-                  Price (MAD)
-                </label>
-                <input
-                  type="number"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tumbleweed"
-                  placeholder="0"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-oceanblue mb-2">
-                  Stock
-                </label>
-                <input
-                  type="number"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tumbleweed"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-oceanblue mb-2">
-                  Category
-                </label>
-                <select className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tumbleweed">
-                  <option>Phone</option>
-                  <option>Monitor</option>
-                  <option>Accessory</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-oceanblue mb-2">
-                  Brand
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-tumbleweed"
-                  placeholder="Enter brand"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-oceanblue mb-2">
-                Condition
-              </label>
-              <div className="flex gap-4">
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="condition"
-                    value="new"
-                    className="mr-2"
-                    defaultChecked
-                  />
-                  New
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="radio"
-                    name="condition"
-                    value="used"
-                    className="mr-2"
-                  />
-                  Used
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-oceanblue mb-2">
-                <Upload size={16} className="inline mr-1" />
-                Product Images
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                <Upload size={24} className="mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-600">
-                  Click to upload or drag and drop
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  PNG, JPG up to 10MB
-                </p>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        {/* Footer */}
-        <div className="flex gap-3 p-6 border-t border-gray-200">
-          <button
-            onClick={() => setShowAddModal(false)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button className="flex-1 px-4 py-2 bg-tumbleweed text-white rounded-lg hover:bg-moderatelybrown">
-            Add Product
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   const Pagination = () => (
     <div className="flex items-center justify-between mt-6">
       <div className="flex items-center gap-2">
@@ -686,7 +441,7 @@ const ProductManagement = () => {
         <Sidebar
           isOpen={isOpen}
           onToggle={handleToggle}
-          activeItem={activeItem}
+          activeItem={"/products"}
           onItemClick={handleItemClick}
           onLogout={handleLogout}
         />
@@ -807,7 +562,10 @@ const ProductManagement = () => {
 
             {/* Modals */}
             <FilterModal />
-            <AddProductModal />
+            <AddProductModal
+              showAddModal={showAddModal}
+              setShowAddModal={setShowAddModal}
+            />
 
             {/* Bottom spacing for mobile navigation */}
             <div className="h-36 lg:h-0"></div>

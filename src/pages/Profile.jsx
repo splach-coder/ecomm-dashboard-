@@ -36,7 +36,7 @@ const ProfilePage = () => {
         <Sidebar 
           isOpen={isOpen} 
           onToggle={handleToggle} 
-          activeItem={activeItem} 
+          activeItem={"/profile"} 
           onItemClick={handleItemClick} 
           onLogout={handleLogout} 
         />

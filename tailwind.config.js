@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        tumbleweed: "#DEA597",
+        tumbleweed: "#21A179",
         oceanblue: "#24333E",
         fog: "#6A8DA6",
         moderatelybrown: "#6B3C23",

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, Plus, Ticket, User, ShoppingCart, DollarSign, MonitorSmartphone } from 'lucide-react';
+import { Home, Plus, ArrowLeftRight, User, ShoppingCart, DollarSign, MonitorSmartphone } from 'lucide-react';
 import IMEIScanner from "../IMEIScanner";
 
 const BottomNavigation = ({ activeItem }) => {
@@ -71,10 +71,7 @@ const BottomNavigation = ({ activeItem }) => {
           
           <div className="space-y-4">
             <button
-              onClick={() => {
-                setShowOptions(false);
-                setShowScanner(true);
-              }}
+              onClick={() => handleNavigation('/products')}
               className="w-full flex items-center gap-4 p-4 bg-green-50 hover:bg-green-100 rounded-2xl transition-colors duration-200"
             >
               <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
@@ -104,7 +101,7 @@ const BottomNavigation = ({ activeItem }) => {
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 flex justify-center items-end z-30">
-        <div className="bg-oceanblue shadow-lg px-4 py-4 flex items-center justify-between gap-6 max-w-md w-full">
+        <div className="bg-oceanblue shadow-lg px-4 py-4 flex items-center justify-between gap-4 max-w-full w-full">
           
           {/* Home */}
           <button
@@ -123,7 +120,7 @@ const BottomNavigation = ({ activeItem }) => {
             </span>
           </button>
 
-          {/* Board */}
+          {/* Products */}
           <button
             onClick={() => handleNavigation('/products')}
             className={`flex flex-col items-center justify-center transition-all duration-200 group hover:scale-105`}
@@ -136,7 +133,7 @@ const BottomNavigation = ({ activeItem }) => {
               />
             </div>
             <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${activeItem === 'products' ? 'text-tumbleweed' : 'text-white group-hover:text-tumbleweed'}`}>
-              Board
+              Products
             </span>
           </button>
 
@@ -156,26 +153,26 @@ const BottomNavigation = ({ activeItem }) => {
             </div>
           </button>
 
-          {/* Tickets */}
+          {/* Sales - Buys */}
           <button
-            onClick={() => handleNavigation('tickets')}
+            onClick={() => handleNavigation('/sales')}
             className={`flex flex-col items-center justify-center transition-all duration-200 group hover:scale-105`}
           >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${activeItem === 'tickets' ? 'bg-tumbleweed' : 'hover:bg-tumbleweed'}`}>
-              <Ticket
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${activeItem === 'sales' ? 'bg-tumbleweed' : 'hover:bg-tumbleweed'}`}>
+              <ArrowLeftRight
                 size={24}
-                className={`text-white transition-colors duration-200 ${activeItem === 'tickets' ? 'text-oceanblue' : 'group-hover:text-oceanblue'}`}
+                className={`text-white transition-colors duration-200 ${activeItem === 'sales' ? 'text-oceanblue' : 'group-hover:text-oceanblue'}`}
                 strokeWidth={1.5}
               />
             </div>
-            <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${activeItem === 'tickets' ? 'text-tumbleweed' : 'text-white group-hover:text-tumbleweed'}`}>
-              Tickets
+            <span className={`text-xs font-medium mt-1 transition-colors duration-200 ${activeItem === 'sales' ? 'text-tumbleweed' : 'text-white group-hover:text-tumbleweed'}`}>
+              Sales
             </span>
           </button>
 
           {/* Profile */}
           <button
-            onClick={() => handleNavigation('/dashboard/profile')}
+            onClick={() => handleNavigation('/profile')}
             className={`flex flex-col items-center justify-center transition-all duration-200 group hover:scale-105 `}
           >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${activeItem === 'profile' ? 'bg-tumbleweed' : 'hover:bg-tumbleweed'}`}>

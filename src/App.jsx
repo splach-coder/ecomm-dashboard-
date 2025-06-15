@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import ProfilePage from './pages/Profile';
 import ProductManagement from './pages/Products';
 import AdminProductDetail from './pages/Product';
+import SalesTransactions from './pages/SalesTransactions';
 import Home from './pages/Home';
 import ResetPassword from './pages/ResetPassword';
 
@@ -37,7 +38,7 @@ function AppRoutes() {
         } 
       />
       <Route 
-        path="/dashboard/profile" 
+        path="/profile" 
         element={
           <ProtectedRoute>
             <ProfilePage />
@@ -49,6 +50,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProductManagement />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/sales" 
+        element={
+          <ProtectedRoute>
+            <SalesTransactions />
           </ProtectedRoute>
         } 
       />
