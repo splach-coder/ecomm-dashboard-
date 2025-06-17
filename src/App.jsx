@@ -52,7 +52,18 @@ function AppRoutes() {
           )
         }
       />
-      <Route path="/" element={<Home />} />
+      <Route
+        path="/"
+        element={
+          loading ? (
+            <div>Loading...</div>
+          ) : user ? (
+            <Navigate to="/dashboard" />
+          ) : (
+            <Login />
+          )
+        }
+      />
       <Route
         path="/dashboard"
         element={

@@ -185,7 +185,7 @@ function Login() {
             <p className="text-gray-600 mb-8 text-center">
               {t('labels.noAccount')}{" "}
               <button
-                //onClick={() => setIsLogin(false)}
+                onClick={() => setIsLogin(false)}
                 className="text-fog font-medium hover:underline"
               >
                 {t('labels.contactOwner')}
