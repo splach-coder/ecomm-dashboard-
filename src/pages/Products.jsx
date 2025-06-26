@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Plus,
   Filter,
@@ -20,6 +21,7 @@ import BottomNavigation from "../components/bottombar/BottomNavigation";
 import { useNavigate } from "react-router-dom";
 
 const ProductManagement = () => {
+  const { t } = useTranslation();
   const { signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(true);
   const [activeItem, setActiveItem] = useState("products");
@@ -34,7 +36,7 @@ const ProductManagement = () => {
     condition: "all",
     priceRange: "all",
     brand: "all",
-    stockStatus: "in_stock", // Default to in stock
+    stockStatus: "in_stock",
   });
   const navigate = useNavigate();
 
@@ -60,22 +62,24 @@ const ProductManagement = () => {
     fetchProducts();
   }, []);
 
-  const categories = ["all", "Phone", "Monitor", "Accessory"];
+  const categories = ["all", "Phone", "Pc", "Accessory", "Tablet"];
   const conditions = ["all", "new", "used"];
   const brands = ["all", "Apple","Samsung","Google","Huawei","Xiaomi","OnePlus","Sony",
   "LG","Nokia","Oppo","Vivo","Motorola","Asus","HTC","Lenovo"
-];
-  const stockStatuses = [
-    { label: "In Stock", value: "in_stock" },
-    { label: "Out of Stock", value: "out_of_stock" },
-    { label: "All", value: "all" },
   ];
+  
+  const stockStatuses = [
+    { label: t("product_management.stock_status.in_stock"), value: "in_stock" },
+    { label: t("product_management.stock_status.out_of_stock"), value: "out_of_stock" },
+    { label: t("product_management.stock_status.all"), value: "all" },
+  ];
+  
   const priceRanges = [
-    { label: "All Prices", value: "all" },
-    { label: "Under 500 MAD", value: "0-500" },
-    { label: "500-2000 MAD", value: "500-2000" },
-    { label: "2000-5000 MAD", value: "2000-5000" },
-    { label: "Above 5000 MAD", value: "5000+" },
+    { label: t("product_management.price_ranges.all"), value: "all" },
+    { label: t("product_management.price_ranges.0-500"), value: "0-500" },
+    { label: t("product_management.price_ranges.500-2000"), value: "500-2000" },
+    { label: t("product_management.price_ranges.2000-5000"), value: "2000-5000" },
+    { label: t("product_management.price_ranges.5000+"), value: "5000+" },
   ];
 
   const filteredProducts = products.filter((product) => {
@@ -92,7 +96,6 @@ const ProductManagement = () => {
     const matchesBrand =
       filters.brand === "all" || product.brand === filters.brand;
 
-    // Stock status filter
     const matchesStockStatus = (() => {
       if (filters.stockStatus === "all") return true;
       if (filters.stockStatus === "in_stock") return product.in_stock > 0;
@@ -136,13 +139,11 @@ const ProductManagement = () => {
       condition: "all",
       priceRange: "all",
       brand: "all",
-      stockStatus: "in_stock", // Reset to default in stock
+      stockStatus: "in_stock",
     });
   };
 
   const ProductCard = ({ product }) => {
-    const navigate = useNavigate();
-
     return (
       <div
         className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer"
@@ -174,7 +175,7 @@ const ProductManagement = () => {
                   : "bg-blue-100 text-blue-800"
               }`}
             >
-              {product.condition}
+              {t(`product_management.conditions.${product.condition}`)}
             </span>
           </div>
           <p className="text-xs text-gray-500 line-clamp-2">
@@ -193,7 +194,9 @@ const ProductManagement = () => {
                     : "bg-red-100 text-red-800"
                 }`}
               >
-                {product.in_stock > 0 ? `${product.in_stock} in stock` : "Out of stock"}
+                {product.in_stock > 0 
+                  ? t("product_management.stock_status.count", { count: product.in_stock })
+                  : t("product_management.stock_status.out_of_stock")}
               </span>
             </div>
           </div>
@@ -208,27 +211,11 @@ const ProductManagement = () => {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="text-left p-4 font-semibold text-oceanblue">
-                Product
-              </th>
-              <th className="text-left p-4 font-semibold text-oceanblue">
-                Category
-              </th>
-              <th className="text-left p-4 font-semibold text-oceanblue">
-                Brand
-              </th>
-              <th className="text-left p-4 font-semibold text-oceanblue">
-                Condition
-              </th>
-              <th className="text-left p-4 font-semibold text-oceanblue">
-                Price
-              </th>
-              <th className="text-left p-4 font-semibold text-oceanblue">
-                Stock
-              </th>
-              <th className="text-left p-4 font-semibold text-oceanblue">
-                IMEI
-              </th>
+              {Object.values(t("product_management.table.headers", { returnObjects: true })).map((header) => (
+                <th key={header} className="text-left p-4 font-semibold text-oceanblue">
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -272,7 +259,7 @@ const ProductManagement = () => {
                         : "bg-blue-100 text-blue-800"
                     }`}
                   >
-                    {product.condition}
+                    {t(`product_management.conditions.${product.condition}`)}
                   </span>
                 </td>
                 <td className="p-4 font-semibold text-tumbleweed">
@@ -286,7 +273,9 @@ const ProductManagement = () => {
                         : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {product.in_stock > 0 ? `${product.in_stock} in stock` : "Out of stock"}
+                    {product.in_stock > 0 
+                      ? t("product_management.stock_status.count", { count: product.in_stock })
+                      : t("product_management.stock_status.out_of_stock")}
                   </span>
                 </td>
                 <td className="p-4 text-gray-700">{product.imei || "-"}</td>
@@ -311,7 +300,9 @@ const ProductManagement = () => {
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-oceanblue">Filters</h3>
+            <h3 className="text-lg font-semibold text-oceanblue">
+              {t("product_management.filters.title")}
+            </h3>
             <button
               onClick={() => setShowFilter(false)}
               className="p-2 hover:bg-gray-100 rounded-lg"
@@ -323,7 +314,7 @@ const ProductManagement = () => {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-oceanblue mb-2">
-                Stock Status
+                {t("product_management.filters.stock_status")}
               </label>
               <select
                 value={filters.stockStatus}
@@ -342,7 +333,7 @@ const ProductManagement = () => {
 
             <div>
               <label className="block text-sm font-medium text-oceanblue mb-2">
-                Category
+                {t("product_management.filters.category")}
               </label>
               <select
                 value={filters.category}
@@ -353,7 +344,7 @@ const ProductManagement = () => {
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat === "all" ? "All Categories" : cat}
+                    {cat === "all" ? t("product_management.filters.all_categories") : cat}
                   </option>
                 ))}
               </select>
@@ -361,7 +352,7 @@ const ProductManagement = () => {
 
             <div>
               <label className="block text-sm font-medium text-oceanblue mb-2">
-                Condition
+                {t("product_management.filters.condition")}
               </label>
               <select
                 value={filters.condition}
@@ -372,7 +363,7 @@ const ProductManagement = () => {
               >
                 {conditions.map((cond) => (
                   <option key={cond} value={cond}>
-                    {cond === "all" ? "All Conditions" : cond}
+                    {cond === "all" ? t("product_management.filters.all_conditions") : t(`product_management.conditions.${cond}`)}
                   </option>
                 ))}
               </select>
@@ -380,7 +371,7 @@ const ProductManagement = () => {
 
             <div>
               <label className="block text-sm font-medium text-oceanblue mb-2">
-                Brand
+                {t("product_management.filters.brand")}
               </label>
               <select
                 value={filters.brand}
@@ -391,7 +382,7 @@ const ProductManagement = () => {
               >
                 {brands.map((brand) => (
                   <option key={brand} value={brand}>
-                    {brand === "all" ? "All Brands" : brand}
+                    {brand === "all" ? t("product_management.filters.all_brands") : brand}
                   </option>
                 ))}
               </select>
@@ -399,7 +390,7 @@ const ProductManagement = () => {
 
             <div>
               <label className="block text-sm font-medium text-oceanblue mb-2">
-                Price Range
+                {t("product_management.filters.price_range")}
               </label>
               <select
                 value={filters.priceRange}
@@ -422,13 +413,13 @@ const ProductManagement = () => {
               onClick={resetFilters}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              Reset
+              {t("product_management.filters.reset")}
             </button>
             <button
               onClick={() => setShowFilter(false)}
               className="flex-1 px-4 py-2 bg-tumbleweed text-white rounded-lg hover:bg-moderatelybrown"
             >
-              Apply
+              {t("product_management.filters.apply")}
             </button>
           </div>
         </div>
@@ -439,7 +430,9 @@ const ProductManagement = () => {
   const Pagination = () => (
     <div className="flex items-center justify-between mt-6">
       <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600">Show</span>
+        <span className="text-sm text-gray-600">
+          {t("product_management.pagination.show")}
+        </span>
         <select
           value={itemsPerPage}
           onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -449,7 +442,9 @@ const ProductManagement = () => {
           <option value={12}>12</option>
           <option value={16}>16</option>
         </select>
-        <span className="text-sm text-gray-600">per page</span>
+        <span className="text-sm text-gray-600">
+          {t("product_management.pagination.per_page")}
+        </span>
       </div>
 
       <div className="flex items-center gap-2">
@@ -524,10 +519,10 @@ const ProductManagement = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-oceanblue">
-                  Product Management
+                  {t("product_management.title")}
                 </h1>
                 <p className="text-gray-600 mt-1">
-                  Manage your store inventory
+                  {t("product_management.subtitle")}
                 </p>
               </div>
 
@@ -536,7 +531,7 @@ const ProductManagement = () => {
                 className="bg-tumbleweed hover:bg-moderatelybrown text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2 self-start sm:self-auto"
               >
                 <Plus size={20} />
-                Add Product
+                {t("product_management.add_product")}
               </button>
             </div>
 
@@ -544,8 +539,10 @@ const ProductManagement = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               {/* Left side - Results info */}
               <div className="text-sm text-gray-600">
-                Showing {displayedProducts.length} of {filteredProducts.length}{" "}
-                products
+                {t("product_management.pagination.showing", {
+                  current: displayedProducts.length,
+                  total: filteredProducts.length
+                })}
               </div>
 
               {/* Right Controls */}
@@ -557,6 +554,7 @@ const ProductManagement = () => {
                     className={`p-2 rounded-md transition-colors duration-200 ${
                       viewMode === "table" ? "bg-gray-100" : "hover:bg-gray-50"
                     }`}
+                    aria-label={t("product_management.view.table")}
                   >
                     <Table size={18} />
                   </button>
@@ -565,6 +563,7 @@ const ProductManagement = () => {
                     className={`p-2 rounded-md transition-colors duration-200 ${
                       viewMode === "grid" ? "bg-gray-100" : "hover:bg-gray-50"
                     }`}
+                    aria-label={t("product_management.view.grid")}
                   >
                     <Grid3X3 size={18} />
                   </button>
@@ -576,7 +575,9 @@ const ProductManagement = () => {
                   className="bg-white border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2"
                 >
                   <Filter size={18} />
-                  <span className="hidden sm:inline">Filter</span>
+                  <span className="hidden sm:inline">
+                    {t("product_management.filters.title")}
+                  </span>
                 </button>
 
                 {/* Simple Search Input */}
@@ -592,7 +593,7 @@ const ProductManagement = () => {
                       onChange={(e) => {
                         setSearchQuery(e.target.value);
                       }}
-                      placeholder="Search products..."
+                      placeholder={t("product_management.search.placeholder")}
                       className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-tumbleweed"
                     />
                   </div>

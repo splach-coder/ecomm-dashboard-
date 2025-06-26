@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../features/auth/AuthContext";
 import Sidebar from "../components/sidebar/Sidebar";
 import BottomNavigation from "../components/bottombar/BottomNavigation";
@@ -20,16 +21,14 @@ import {
   Copy,
   X,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-// Copy Product Modal Component
 function CopyProductModal({ show, onClose, product, onCopySuccess }) {
+  const { t } = useTranslation();
   const [copyCount, setCopyCount] = useState(1);
   const [imeiInputs, setImeiInputs] = useState(['']);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Reset inputs when modal opens/closes
   useEffect(() => {
     if (show) {
       setCopyCount(1);
@@ -37,7 +36,6 @@ function CopyProductModal({ show, onClose, product, onCopySuccess }) {
     }
   }, [show]);
 
-  // Update IMEI inputs when count changes
   useEffect(() => {
     const newInputs = Array(copyCount).fill('').map((_, index) => 
       imeiInputs[index] || ''
@@ -46,7 +44,7 @@ function CopyProductModal({ show, onClose, product, onCopySuccess }) {
   }, [copyCount]);
 
   const handleCopyCountChange = (value) => {
-    const count = Math.max(1, Math.min(10, parseInt(value) || 1)); // Limit between 1-10
+    const count = Math.max(1, Math.min(10, parseInt(value) || 1));
     setCopyCount(count);
   };
 
@@ -56,33 +54,24 @@ function CopyProductModal({ show, onClose, product, onCopySuccess }) {
     setImeiInputs(newInputs);
   };
 
-  const generateProductId = () => {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000);
-    return `PRD-${timestamp}-${random}`;
-  };
-
   const handleCopyProducts = async () => {
     setIsLoading(true);
     try {
-      // Validate IMEI inputs
       const emptyImeis = imeiInputs.some(imei => !imei.trim());
       if (emptyImeis) {
-        alert('Please fill all IMEI codes');
+        alert(t('product_detail.errors.fill_all_imei'));
         setIsLoading(false);
         return;
       }
 
-      // Check for duplicate IMEIs
       const uniqueImeis = new Set(imeiInputs.map(imei => imei.trim()));
       if (uniqueImeis.size !== imeiInputs.length) {
-        alert('IMEI codes must be unique');
+        alert(t('product_detail.errors.imei_unique'));
         setIsLoading(false);
         return;
       }
 
-      // Create product copies
-      const productCopies = imeiInputs.map((imei, index) => ({
+      const productCopies = imeiInputs.map((imei) => ({
         title: product.title,
         description: product.description,
         price: product.price,
@@ -92,27 +81,26 @@ function CopyProductModal({ show, onClose, product, onCopySuccess }) {
         in_stock: 1,
         images: product.images,
         imei: imei.trim(),
+        supplier_name: product.supplier_name,
+        supplier_phone: product.supplier_phone,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }));
 
-      // Insert into Supabase
-      const { error } = await supabase
-        .from('products')
-        .insert(productCopies);
+      const { error } = await supabase.from('products').insert(productCopies);
 
       if (error) {
         console.error('Error copying products:', error);
-        alert('Failed to copy products. Please try again.');
+        alert(t('product_detail.errors.copy_failed'));
         return;
       }
 
-      alert(`Successfully created ${copyCount} product copies!`);
+      alert(t('product_detail.errors.copy_success', { count: copyCount }));
       onCopySuccess();
       onClose();
     } catch (error) {
       console.error('Error:', error);
-      alert('An error occurred while copying products.');
+      alert(t('product_detail.errors.error_copying'));
     } finally {
       setIsLoading(false);
     }
@@ -123,9 +111,10 @@ function CopyProductModal({ show, onClose, product, onCopySuccess }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50 lg:items-center">
       <div className="bg-white w-full max-w-md rounded-t-xl lg:rounded-xl max-h-[90vh] overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-oceanblue">Copy Product</h3>
+          <h3 className="text-lg font-semibold text-oceanblue">
+            {t('product_detail.copy_product')}
+          </h3>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded"
@@ -135,18 +124,17 @@ function CopyProductModal({ show, onClose, product, onCopySuccess }) {
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
-          {/* Product Info */}
           <div className="bg-gray-50 p-3 rounded-lg">
-            <h4 className="font-medium text-sm text-gray-700 mb-1">Copying:</h4>
+            <h4 className="font-medium text-sm text-gray-700 mb-1">
+              {t('product_detail.copying')}
+            </h4>
             <p className="text-sm text-gray-600">{product.title}</p>
           </div>
 
-          {/* Copy Count */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Number of Copies
+              {t('product_detail.number_of_copies')}
             </label>
             <input
               type="number"
@@ -159,17 +147,16 @@ function CopyProductModal({ show, onClose, product, onCopySuccess }) {
             />
           </div>
 
-          {/* IMEI Inputs */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              IMEI Codes
+              {t('product_detail.imei_codes')}
             </label>
             <div className="space-y-2">
               {imeiInputs.map((imei, index) => (
                 <div key={index}>
                   <input
                     type="text"
-                    placeholder={`IMEI Code ${index + 1}`}
+                    placeholder={t('product_detail.imei_code', { index: index + 1 })}
                     value={imei}
                     onChange={(e) => handleImeiChange(index, e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-oceanblue focus:border-transparent"
@@ -181,21 +168,22 @@ function CopyProductModal({ show, onClose, product, onCopySuccess }) {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="border-t border-gray-200 p-4 flex gap-3">
           <button
             onClick={onClose}
             className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             disabled={isLoading}
           >
-            Cancel
+            {t('product_detail.cancel')}
           </button>
           <button
             onClick={handleCopyProducts}
             disabled={isLoading}
             className="flex-1 px-4 py-2 bg-oceanblue hover:bg-oceanblue/90 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Copying...' : `Copy ${copyCount} Products`}
+            {isLoading 
+              ? t('product_detail.copying_loading')
+              : t('product_detail.copy_products', { count: copyCount })}
           </button>
         </div>
       </div>
@@ -203,20 +191,18 @@ function CopyProductModal({ show, onClose, product, onCopySuccess }) {
   );
 }
 
-// AdminProductDetail Component (integrated within the dashboard)
 function AdminProductDetail({ product }) {
+  const { t } = useTranslation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
   const [showSellForm, setShowSellForm] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
 
-  // Default product data for demo purposes
   const defaultProduct = {
     id: "PRD-2025-001",
     title: "Professional Studio Monitor Headphones",
-    description:
-      "High-fidelity studio monitor headphones designed for audio professionals. Features precision-tuned 50mm drivers, comfortable over-ear design, and detachable cable system. Ideal for mixing, mastering, and critical listening applications.",
+    description: "High-fidelity studio monitor headphones designed for audio professionals.",
     price: 349.99,
     category: "Audio Equipment",
     brand: "StudioCraft Pro",
@@ -224,69 +210,50 @@ function AdminProductDetail({ product }) {
     in_stock: 12,
     images: [
       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=600&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&h=600&fit=crop"
     ],
     created_at: "2025-06-13T12:00:00Z",
     updated_at: "2025-06-13T14:30:00Z",
   };
 
   const productData = product || defaultProduct;
-
-  // Check if product is out of stock
   const isOutOfStock = productData.in_stock <= 0;
 
-  // Action button handlers
   const handleSell = () => {
-    // Check if product is out of stock
     if (isOutOfStock) {
-      alert('Cannot sell product - Out of stock!');
+      alert(t('product_detail.errors.cannot_sell'));
       return;
     }
     setShowSellForm(true);
   };
 
-  const handleModify = () => {
-    setShowUpdateModal(true);
-  };
-
-  const handleCopy = () => {
-    setShowCopyModal(true);
-  };
-
-  const handleCopySuccess = () => {
-    // Refresh the page or update the product list
-    window.location.reload(); // Simple refresh - you might want to implement a more sophisticated update
-  };
+  const handleModify = () => setShowUpdateModal(true);
+  const handleCopy = () => setShowCopyModal(true);
+  const handleCopySuccess = () => window.location.reload();
 
   async function insertSale(data) {
-    console.log("📦 Inserting sale:", data);
-
     const { error } = await supabase.from("sells").insert([
       {
         type: data.type,
-        product_id: data.productId,
-        buyer_name: data.buyerName,
-        buyer_phone: data.buyerPhone,
-        sell_price: data.price,
-        created_at: data.timestamp,
+        product_id: data.product_id,
+        buyer_name: data.buyer_name,
+        buyer_phone: data.buyer_phone,
+        sell_price: data.sell_price,
+        paid_price: data.paid_price,
+        rest_price: data.rest_price,
+        created_at: new Date().toISOString(),
       },
     ]);
-
+  
     if (error) {
-      console.error("❌ Insert error:", error);
+      console.error("Insert error:", error);
       throw error;
     }
-
-    updateProductStock(data.productId, -1);
-
-    alert("📦 Congrats for the sale");
-
+  
+    await updateProductStock(data.product_id, -1);
     navigate("/products");
   }
 
-  // Format currency
   const formatPrice = (price) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -294,7 +261,6 @@ function AdminProductDetail({ product }) {
     }).format(price);
   };
 
-  // Format date for admin display
   const formatDate = (dateString) => {
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
@@ -305,23 +271,22 @@ function AdminProductDetail({ product }) {
     }).format(new Date(dateString));
   };
 
-  // Get stock status configuration
   const getStockStatus = (stock) => {
     if (stock === 0) {
       return {
-        text: "Out of Stock",
+        text: t('product_detail.status.out_of_stock'),
         className: "bg-red-100 text-red-800 border-red-200",
         icon: <Archive className="w-4 h-4" />,
       };
     } else if (stock <= 5) {
       return {
-        text: `Only ${stock} left`,
+        text: t('product_detail.status.only_x_left', { count: stock }),
         className: "bg-amber-100 text-amber-800 border-amber-200",
         icon: <Clock className="w-4 h-4" />,
       };
     } else {
       return {
-        text: "In Stock",
+        text: t('product_detail.status.in_stock'),
         className: "bg-green-100 text-green-800 border-green-200",
         icon: <Package className="w-4 h-4" />,
       };
@@ -329,6 +294,9 @@ function AdminProductDetail({ product }) {
   };
 
   const stockStatus = getStockStatus(productData.in_stock);
+  const conditionText = productData.condition === "new" 
+    ? t(`product_detail.status.${window.innerWidth >= 1024 ? 'brand_new' : 'new'}`)
+    : t(`product_detail.status.${window.innerWidth >= 1024 ? 'pre_owned' : 'used'}`);
 
   return (
     <article className="bg-white overflow-hidden">
@@ -347,25 +315,22 @@ function AdminProductDetail({ product }) {
         onCopySuccess={handleCopySuccess}
       />
 
-      {/* Add back button at the top */}
       <div className="p-6 border-b border-gray-100">
         <button
           onClick={() => navigate("/products")}
           className="text-sm text-tumbleweed hover:underline flex items-center gap-1"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back to Products
+          {t('product_detail.back_to_products')}
         </button>
       </div>
 
-      {/* Mobile/Tablet Layout */}
       <div className="lg:hidden">
-        {/* Image Gallery - Mobile */}
         <section className="relative">
           <div className="aspect-square bg-gray-50">
             <img
               src={`${productData.images[currentImageIndex]}`}
-              alt={`${productData.title} - View ${currentImageIndex + 1}`}
+              alt={`${productData.title}`}
               className="w-full h-full object-cover"
               loading="lazy"
             />
@@ -376,7 +341,6 @@ function AdminProductDetail({ product }) {
             )}
           </div>
 
-          {/* Thumbnail Strip - Mobile */}
           {productData.images.length > 1 && (
             <div className="flex gap-2 p-3 overflow-x-auto">
               {productData.images.map((image, index) => (
@@ -384,25 +348,17 @@ function AdminProductDetail({ product }) {
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
                   className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                    index === currentImageIndex
-                      ? "border-tumbleweed"
-                      : "border-gray-200"
+                    index === currentImageIndex ? "border-tumbleweed" : "border-gray-200"
                   }`}
                 >
-                  <img
-                    src={`${image}`}
-                    alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={`${image}`} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
           )}
         </section>
 
-        {/* Product Info - Mobile */}
         <section className="p-4 space-y-4">
-          {/* Header Row */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <h2 className="text-xl font-bold text-oceanblue leading-tight mb-1">
@@ -422,7 +378,6 @@ function AdminProductDetail({ product }) {
             </div>
           </div>
 
-          {/* Status Badges */}
           <div className="flex gap-2 flex-wrap">
             <span
               className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
@@ -432,7 +387,7 @@ function AdminProductDetail({ product }) {
               }`}
             >
               <Eye className="w-4 h-4" />
-              {productData.condition === "new" ? "New" : "Used"}
+              {conditionText}
             </span>
 
             <span
@@ -443,7 +398,6 @@ function AdminProductDetail({ product }) {
             </span>
           </div>
 
-          {/* Action Buttons - Mobile */}
           <div className="flex gap-2 pt-2">
             <button
               onClick={handleSell}
@@ -453,48 +407,54 @@ function AdminProductDetail({ product }) {
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                   : 'bg-oceanblue hover:bg-oceanblue/90 text-white'
               }`}
-              title={isOutOfStock ? 'Product is out of stock' : 'Sell Product'}
             >
               <ShoppingCart className="w-5 h-5" />
-              {isOutOfStock ? 'Out of Stock' : 'Sell Product'}
+              {isOutOfStock ? t('product_detail.out_of_stock') : t('product_detail.sell_product')}
             </button>
             <button
               onClick={handleModify}
               className="bg-tumbleweed hover:bg-tumbleweed/90 text-white font-medium py-3 px-3 rounded-lg transition-colors flex items-center justify-center"
-              title="Modify Product"
             >
               <Edit3 className="w-5 h-5" />
             </button>
             <button
               onClick={handleCopy}
               className="bg-fog hover:bg-fog/90 text-white font-medium py-3 px-3 rounded-lg transition-colors flex items-center justify-center"
-              title="Copy Product"
             >
               <Copy className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Description */}
           <div>
             <h3 className="text-sm font-semibold text-moderatelybrown mb-2">
-              Description
+              {t('product_detail.description')}
             </h3>
             <p className="text-grey text-sm leading-relaxed">
               {productData.description}
             </p>
           </div>
 
-          {/* Metadata */}
+          <div>
+            <h3 className="text-sm font-semibold text-moderatelybrown mb-2">
+              {t('product_detail.supplier_information')}
+            </h3>
+            <p className="text-grey text-sm leading-relaxed">
+              {t('product_detail.name')} : {productData.supplier_name}
+              <br />
+              {t('product_detail.phone')} : {productData.supplier_phone}
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 gap-3 pt-3 border-t border-gray-100">
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-grey font-medium">Quantity:</span>
+              <span className="text-grey font-medium">{t('product_detail.quantity')}:</span>
               <span className="bg-fog/20 text-fog border border-fog/30 w-10 h-10 flex justify-center items-center rounded-full font-mono text-lg">
                 {productData.in_stock}
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="w-4 h-4 text-grey" />
-              <span className="text-grey">Created:</span>
+              <span className="text-grey">{t('product_detail.created')}:</span>
               <span className="text-oceanblue">
                 {formatDate(productData.created_at)}
               </span>
@@ -502,7 +462,7 @@ function AdminProductDetail({ product }) {
             {productData.updated_at && (
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="w-4 h-4 text-grey" />
-                <span className="text-grey">Updated:</span>
+                <span className="text-grey">{t('product_detail.last_updated')}:</span>
                 <span className="text-oceanblue">
                   {formatDate(productData.updated_at)}
                 </span>
@@ -512,21 +472,18 @@ function AdminProductDetail({ product }) {
         </section>
       </div>
 
-      {/* Desktop Layout */}
       <div className="hidden lg:block">
         <div className="grid grid-cols-5 gap-6 p-6">
-          {/* Image Gallery - Desktop */}
           <section className="col-span-2">
             <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden mb-4">
               <img
                 src={`${productData.images[currentImageIndex]}`}
-                alt={`${productData.title} - View ${currentImageIndex + 1}`}
+                alt={`${productData.title}`}
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
             </div>
 
-            {/* Thumbnail Grid - Desktop */}
             {productData.images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
                 {productData.images.map((image, index) => (
@@ -534,25 +491,17 @@ function AdminProductDetail({ product }) {
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
                     className={`aspect-square rounded-lg overflow-hidden border-2 transition-colors ${
-                      index === currentImageIndex
-                        ? "border-tumbleweed"
-                        : "border-gray-200 hover:border-gray-300"
+                      index === currentImageIndex ? "border-tumbleweed" : "border-gray-200"
                     }`}
                   >
-                    <img
-                      src={`${image}`}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={`${image}`} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
             )}
           </section>
 
-          {/* Product Information - Desktop */}
           <section className="col-span-3 space-y-6">
-            {/* Header Section */}
             <div>
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -571,7 +520,7 @@ function AdminProductDetail({ product }) {
                 <div className="text-right">
                   <div className="flex items-center gap-1 text-grey mb-1">
                     MAD
-                    <span className="text-sm">Price</span>
+                    <span className="text-sm">{t('product_detail.price')}</span>
                   </div>
                   <div className="text-3xl font-bold text-oceanblue">
                     {formatPrice(productData.price)}
@@ -579,7 +528,6 @@ function AdminProductDetail({ product }) {
                 </div>
               </div>
 
-              {/* Status Badges */}
               <div className="flex gap-3">
                 <span
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${
@@ -589,7 +537,7 @@ function AdminProductDetail({ product }) {
                   }`}
                 >
                   <Eye className="w-4 h-4" />
-                  {productData.condition === "new" ? "Brand New" : "Pre-owned"}
+                  {conditionText}
                 </span>
 
                 <span
@@ -601,7 +549,6 @@ function AdminProductDetail({ product }) {
               </div>
             </div>
 
-            {/* Action Buttons - Desktop */}
             <div className="flex gap-4">
               <button
                 onClick={handleSell}
@@ -611,43 +558,38 @@ function AdminProductDetail({ product }) {
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                     : 'bg-oceanblue hover:bg-oceanblue/90 text-white'
                 }`}
-                title={isOutOfStock ? 'Product is out of stock' : 'Sell Product'}
               >
                 <ShoppingCart className="w-5 h-5" />
-                {isOutOfStock ? 'Out of Stock' : 'Sell Product'}
+                {isOutOfStock ? t('product_detail.out_of_stock') : t('product_detail.sell_product')}
               </button>
               <button
                 onClick={handleModify}
                 className="bg-tumbleweed hover:bg-tumbleweed/90 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-sm hover:shadow-md"
-                title="Modify Product"
               >
                 <Edit3 className="w-5 h-5" />
               </button>
               <button
                 onClick={handleCopy}
                 className="bg-fog hover:bg-fog/90 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-sm hover:shadow-md"
-                title="Copy Product"
               >
                 <Copy className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Description Section */}
             <div>
               <h3 className="text-lg font-semibold text-moderatelybrown mb-3">
-                Product Description
+                {t('product_detail.product_info')}
               </h3>
               <p className="text-grey leading-relaxed">
                 {productData.description}
               </p>
             </div>
 
-            {/* Metadata Grid */}
             <div className="grid grid-cols-2 gap-6 pt-6 border-t border-gray-100">
               <div className="space-y-3">
                 <div>
                   <span className="block text-sm font-medium text-grey mb-1">
-                    Product ID
+                    {t('product_detail.product_id')}
                   </span>
                   <span className="text-oceanblue font-mono">
                     {productData.id}
@@ -655,10 +597,10 @@ function AdminProductDetail({ product }) {
                 </div>
                 <div>
                   <span className="block text-sm font-medium text-grey mb-1">
-                    Stock Quantity
+                    {t('product_detail.stock_quantity')}
                   </span>
                   <span className="text-oceanblue font-semibold">
-                    {productData.in_stock} units
+                    {productData.in_stock} {t('product_detail.units')}
                   </span>
                 </div>
               </div>
@@ -666,7 +608,7 @@ function AdminProductDetail({ product }) {
               <div className="space-y-3">
                 <div>
                   <span className="block text-sm font-medium text-grey mb-1">
-                    Created
+                    {t('product_detail.created')}
                   </span>
                   <div className="flex items-center gap-2 text-oceanblue">
                     <Calendar className="w-4 h-4" />
@@ -676,7 +618,7 @@ function AdminProductDetail({ product }) {
                 {productData.updated_at && (
                   <div>
                     <span className="block text-sm font-medium text-grey mb-1">
-                      Last Updated
+                      {t('product_detail.last_updated')}
                     </span>
                     <div className="flex items-center gap-2 text-oceanblue">
                       <Clock className="w-4 h-4" />
@@ -693,26 +635,21 @@ function AdminProductDetail({ product }) {
       <SellTradeFormPanel
         isOpen={showSellForm}
         onClose={() => setShowSellForm(false)}
-        onSuccess={(data) => {
-          console.log("Sale completed:", data);
-        }}
-        productId={product.id}
-        insertSale={insertSale} // Your Supabase function
+        productId={product?.id}
+        insertSale={insertSale}
       />
     </article>
   );
 }
 
-// Main Dashboard Component
 function ProductDetailDashboard() {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const [userData, setUserData] = useState(null);
   const [isOpen, setIsOpen] = useState(true);
-  const [activeItem, setActiveItem] = useState("products"); // Changed to 'products' since this is product detail
+  const [activeItem, setActiveItem] = useState("products");
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Get product from location state or use default
   const product = location.state?.product;
 
   const handleToggle = () => setIsOpen(!isOpen);
@@ -733,14 +670,13 @@ function ProductDetailDashboard() {
   if (!userData) {
     return (
       <div className="flex items-center justify-center h-screen">
-        Loading user data...
+        {t('loading_user_data')}
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex pb-24">
-      {/* Sidebar for larger screens */}
       <div className="hidden lg:block fixed h-full">
         <Sidebar
           isOpen={isOpen}
@@ -751,7 +687,6 @@ function ProductDetailDashboard() {
         />
       </div>
 
-      {/* BottomNavigation for mobile screens */}
       <div className="block lg:hidden">
         <BottomNavigation
           activeItem={activeItem}
@@ -760,13 +695,8 @@ function ProductDetailDashboard() {
         />
       </div>
 
-      <div
-        className={`flex-1 ${
-          isOpen ? "lg:ml-64" : "lg:ml-20"
-        } transition-all duration-200`}
-      >
+      <div className={`flex-1 ${isOpen ? "lg:ml-64" : "lg:ml-20"} transition-all duration-200`}>
         <div className="container">
-          {/* Product Detail Component */}
           <AdminProductDetail product={product} />
         </div>
       </div>

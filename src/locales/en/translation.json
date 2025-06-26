@@ -1,114 +1,490 @@
 {
-    "profile_settings": "Profile Settings",
-    "manage_your_account_information_and_preferences": "Manage your account information and preferences",
-    "english": "English",
-    "français": "Français",
-    "العربية": "العربية",
-    "loading_user_data...": "Loading user data...",
-    "personal_information": "Personal Information",
-    "your_personal_details_and_information": "Your personal details and information",
-    "first_name": "First name",
-    "last_name": "Last name",
-    "email_address": "Email Address",
-    "account_settings": "Account Settings",
-    "manage_your_account_preferences_and_security": "Manage your account preferences and security",
-    "sign_out": "Sign Out",
-    "user_profile": "User Profile",
-    "navigation": {
-      "home": "Home",
-      "products": "Products",
-      "sales": "Sales",
-      "profile": "Profile"
+  "profile_settings": "Profile Settings",
+  "manage_your_account_information_and_preferences": "Manage your account information and preferences",
+  "english": "English",
+  "français": "Français",
+  "العربية": "العربية",
+  "loading_user_data...": "Loading user data...",
+  "personal_information": "Personal Information",
+  "your_personal_details_and_information": "Your personal details and information",
+  "first_name": "First name",
+  "last_name": "Last name",
+  "email_address": "Email Address",
+  "account_settings": "Account Settings",
+  "manage_your_account_preferences_and_security": "Manage your account preferences and security",
+  "sign_out": "Sign Out",
+  "user_profile": "User Profile",
+  "navigation": {
+    "home": "Home",
+    "products": "Products",
+    "sales": "Sales",
+    "profile": "Profile"
+  },
+  "titles": {
+    "loginAccount": "Log in to your account",
+    "createAccount": "Create an account",
+    "phoneStoreDashboard": "Phone Store Dashboard",
+    "revenueByCategory": "Revenue by Category",
+    "inventoryStatus": "Inventory Status",
+    "keyPerformanceIndicators": "Key Performance Indicators",
+    "options": "Options",
+    "navigation": "Navigation"
+  },
+  "labels": {
+    "websiteLogo": "website logo",
+    "noAccount": "Don't have an account?",
+    "contactOwner": "Please contact the owner",
+    "haveAccount": "Already have an account?",
+    "loginHere": "Log in",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "resetLinkSent": "Reset link sent!",
+    "agreeToTerms": "I agree to the",
+    "termsConditions": "Terms & Conditions",
+    "processing": "Processing...",
+    "orRegisterWith": "Or register with",
+    "businessOverview": "Real-time business overview and analytics",
+    "lastUpdated": "Last updated",
+    "currency": "MAD",
+    "units": "units",
+    "categoryInStock": "{{category}} in Stock",
+    "smartphone": "Smartphone",
+    "smartphoneScannedDescription": "This is a smartphone scanned via IMEI barcode",
+    "tradeProductInternal": "Trade Interenal Product",
+    "tradeProductExternal": "Trade External Product",
+    "tradeProductDescription": "List your item for trade",
+    "buyProduct": "Buy Product",
+    "buyProductDescription": "Browse items to purchase",
+    "timeRange": {
+      "today": "Today",
+      "week": "Week",
+      "month": "Month",
+      "three_months": "3 Month",
+      "year": "1 Year"
     },
-    "titles": {
-      "loginAccount": "Log in to your account",
-      "createAccount": "Create an account",
-      "phoneStoreDashboard": "Phone Store Dashboard",
-      "revenueByCategory": "Revenue by Category",
-      "inventoryStatus": "Inventory Status",
-      "keyPerformanceIndicators": "Key Performance Indicators",
-      "options": "Options",
-      "navigation": "Navigation"
+    "categories": {
+      "Phone": "Phones",
+      "accessories": "Accessories",
+      "Monitor": "Monitor"
     },
-    "labels": {
-      "websiteLogo": "website logo",
-      "noAccount": "Don't have an account?",
-      "contactOwner": "Please contact the owner",
-      "haveAccount": "Already have an account?",
-      "loginHere": "Log in",
-      "rememberMe": "Remember me",
-      "forgotPassword": "Forgot password?",
-      "resetLinkSent": "Reset link sent!",
-      "agreeToTerms": "I agree to the",
-      "termsConditions": "Terms & Conditions",
-      "processing": "Processing...",
-      "orRegisterWith": "Or register with",
-      "businessOverview": "Real-time business overview and analytics",
-      "lastUpdated": "Last updated",
-      "currency": "MAD",
-      "units": "units",
-      "categoryInStock": "{{category}} in Stock",
-      "smartphone": "Smartphone",
-      "smartphoneScannedDescription": "This is a smartphone scanned via IMEI barcode",
-      "tradeProduct": "Trade Product",
-      "tradeProductDescription": "List your item for trade",
-      "buyProduct": "Buy Product",
-      "buyProductDescription": "Browse items to purchase",
-      "timeRange": {
-        "today": "Today",
-        "week": "Week",
-        "month": "Month"
+    "metrics": {
+      "totalRevenue": "Total Revenue",
+      "totalProfit": "Total Profit",
+      "profitMargin": "Profit Margin",
+      "transactions": "Transactions",
+      "averageSalePrice": "Avg Sale Price",
+      "averageTradeProfit": "Avg Trade Profit",
+      "inventoryValue": "Inventory Value",
+      "totalSales": "Total Sales",
+      "restPrice": "Rest Price"
+    }
+  },
+  "placeholders": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "password": "Enter your password"
+  },
+  "buttons": {
+    "login": "Log in",
+    "createAccount": "Create account",
+    "continueWithGoogle": "Continue with Google"
+  },
+  "success": {
+    "accountCreated": "Account created successfully! Please log in.",
+    "resetLinkSent": "Password reset link sent! Check your email.",
+    "dataRefreshed": "Data refreshed successfully",
+    "cacheClear": "Cache cleared successfully",
+    "productScanned": "Product scanned successfully",
+    "navigationSuccessful": "Navigation completed"
+  },
+  "errors": {
+    "emailRequired": "Please enter your email address",
+    "invalidEmail": "Please enter a valid email address",
+    "resetLinkFailed": "Failed to send reset link",
+    "fetchInventoryStats": "Error fetching inventory stats:",
+    "fetchCategoryRevenue": "Error fetching category revenue:",
+    "fetchData": "Error fetching data:",
+    "scanFailed": "Failed to scan product",
+    "navigationFailed": "Navigation failed"
+  },
+  "messages": {
+    "loadingUserData": "Loading user data..."
+  },
+  "warnings": {
+    "usingMockData": "Using mock data due to connection issues",
+    "cacheExpired": "Cache expired, refreshing data",
+    "scannerUnavailable": "Scanner temporarily unavailable"
+  },
+  "product_management": {
+    "title": "Product Management",
+    "subtitle": "Manage your store inventory",
+    "add_product": "Add Product",
+    "view": {
+      "grid": "Grid View",
+      "table": "Table View"
+    },
+    "filters": {
+      "title": "Filters",
+      "stock_status": "Stock Status",
+      "category": "Category",
+      "condition": "Condition",
+      "brand": "Brand",
+      "price_range": "Price Range",
+      "all_categories": "All Categories",
+      "all_conditions": "All Conditions",
+      "all_brands": "All Brands",
+      "reset": "Reset",
+      "apply": "Apply"
+    },
+    "search": {
+      "placeholder": "Search products..."
+    },
+    "pagination": {
+      "show": "Show",
+      "per_page": "per page",
+      "showing": "Showing {{current}} of {{total}} products"
+    },
+    "table": {
+      "headers": {
+        "product": "Product",
+        "category": "Category",
+        "brand": "Brand",
+        "condition": "Condition",
+        "price": "Price",
+        "stock": "Stock",
+        "imei": "IMEI"
+      }
+    },
+    "stock_status": {
+      "in_stock": "In Stock",
+      "out_of_stock": "Out of Stock",
+      "all": "All",
+      "count": "{{count}} in stock"
+    },
+    "conditions": {
+      "new": "New",
+      "used": "Used"
+    },
+    "price_ranges": {
+      "all": "All Prices",
+      "0-500": "Under 500 MAD",
+      "500-2000": "500-2000 MAD",
+      "2000-5000": "2000-5000 MAD",
+      "5000+": "Above 5000 MAD"
+    }
+  },
+  "product_detail": {
+    "back_to_products": "Back to Products",
+    "copy_product": "Copy Product",
+    "copying": "Copying:",
+    "number_of_copies": "Number of Copies",
+    "imei_codes": "IMEI Codes",
+    "imei_code": "IMEI Code {{index}}",
+    "cancel": "Cancel",
+    "copy_products": "Copy {{count}} Products",
+    "copying_loading": "Copying...",
+    "product_info": "Product Information",
+    "supplier_information": "Supplier Information",
+    "name": "Name",
+    "phone": "Phone",
+    "description": "Description",
+    "quantity": "Quantity",
+    "created": "Created",
+    "updated": "Updated",
+    "last_updated": "Last Updated",
+    "product_id": "Product ID",
+    "stock_quantity": "Stock Quantity",
+    "units": "units",
+    "price": "Price",
+    "sell_product": "Sell Product",
+    "modify_product": "Modify Product",
+    "out_of_stock": "Out of Stock",
+    "status": {
+      "new": "New",
+      "used": "Used",
+      "brand_new": "Brand New",
+      "pre_owned": "Pre-owned",
+      "in_stock": "In Stock",
+      "out_of_stock": "Out of Stock",
+      "only_x_left": "Only {{count}} left"
+    },
+    "errors": {
+      "fill_all_imei": "Please fill all IMEI codes",
+      "imei_unique": "IMEI codes must be unique",
+      "copy_failed": "Failed to copy products. Please try again.",
+      "error_copying": "An error occurred while copying products.",
+      "copy_success": "Successfully created {{count}} product copies!",
+      "cannot_sell": "Cannot sell product - Out of stock!"
+    }
+  },
+  "loading": "Loading...",
+  "loading_user_data": "Loading user data...",
+  "sell_form": {
+    "title": "Sell Product",
+    "confirm_title": "Confirm Sale",
+    "confirm_message": "Are you sure you want to sell this product to <strong>{{name}}</strong>?",
+    "sale_price": "Sale Price:",
+    "paid_amount": "Paid Amount:",
+    "remaining": "Remaining:",
+    "cancel": "Cancel",
+    "confirm_sale": "Confirm Sale",
+    "processing": "Processing...",
+    "fields": {
+      "buyer_name": "Buyer's Full Name",
+      "buyer_name_placeholder": "Enter buyer's full name",
+      "phone": "Phone Number",
+      "phone_placeholder": "Enter buyer's phone number",
+      "sale_price": "Sale Price (MAD)",
+      "sale_price_placeholder": "0.00",
+      "paid_amount": "Paid Amount (MAD)",
+      "paid_amount_placeholder": "0.00",
+      "remaining_amount": "Remaining Amount (MAD)",
+      "remaining_placeholder": "Calculated automatically",
+      "optional": "(optional)"
+    },
+    "buttons": {
+      "sell_product": "Sell Product"
+    }
+  },
+  "sales_transactions": {
+    "title": "Sales & Trade Transactions",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "clear_filters": "Clear Filters",
+    "showing_results": "Showing {{count}} of {{total}} transactions",
+    "no_transactions": {
+      "title": "No transactions",
+      "description": "You haven't made any transactions yet.",
+      "filtered_description": "No transactions match your selected date range."
+    },
+    "summary": {
+      "transactions": "Transactions",
+      "total_sales": "Total Sales",
+      "total_profit": "Total Profit",
+      "sale": "Sale",
+      "trade": "Trade",
+      "view": "View"
+    },
+    "table": {
+      "product": "Product",
+      "buyer": "Buyer",
+      "date": "Date",
+      "sale_price": "Sale Price",
+      "profit": "Profit",
+      "type": "Type",
+      "actions": "Actions"
+    },
+    "details": {
+      "title": {
+        "sale": "Sale Details",
+        "trade": "Trade Details"
       },
-      "categories": {
-        "Phone": "Phones",
-        "accessories": "Accessories"
-      },
-      "metrics": {
-        "totalRevenue": "Total Revenue",
-        "totalProfit": "Total Profit",
-        "profitMargin": "Profit Margin",
-        "transactions": "Transactions",
-        "avgSalePrice": "Avg Sale Price",
-        "avgTradeProfit": "Avg Trade Profit",
-        "inventoryValue": "Inventory Value",
-        "totalSales": "Total Sales"
+      "product": "Product",
+      "original_price": "Original Price",
+      "traded_product": "Traded Product",
+      "buyback_price": "Buyback Price",
+      "buyer_info": "Buyer Information",
+      "name": "Name",
+      "phone": "Phone",
+      "transaction_details": "Transaction Details",
+      "sale_price": "Sale Price",
+      "user_paid": "User Paid",
+      "trade_value": "Trade Value",
+      "transaction_id": "Transaction ID",
+      "close": "Close"
+    },
+    "loading": "Loading transactions...",
+    "error": "An error occurred while loading transactions."
+  },
+  "add_product_modal": {
+    "title": "Add New Product",
+    "fields": {
+      "title": "Title",
+      "imei": "IMEI",
+      "price": "Price (MAD)",
+      "in_stock": "Stock",
+      "supplier_name": "Supplier Name (Optional)",
+      "supplier_phone": "Supplier Phone (Optional)",
+      "description": "Description (optional)",
+      "category": "Category",
+      "brand": "Brand",
+      "condition": {
+        "new": "New",
+        "used": "Used"
       }
     },
     "placeholders": {
-      "firstName": "First name",
-      "lastName": "Last name",
-      "email": "Email",
-      "password": "Enter your password"
+      "choose_category": "Choose category",
+      "choose_brand": "Choose brand"
     },
     "buttons": {
-      "login": "Log in",
-      "createAccount": "Create account",
-      "continueWithGoogle": "Continue with Google"
-    },
-    "success": {
-      "accountCreated": "Account created successfully! Please log in.",
-      "resetLinkSent": "Password reset link sent! Check your email.",
-      "dataRefreshed": "Data refreshed successfully",
-      "cacheClear": "Cache cleared successfully",
-      "productScanned": "Product scanned successfully",
-      "navigationSuccessful": "Navigation completed"
-    },
-    "errors": {
-      "emailRequired": "Please enter your email address",
-      "invalidEmail": "Please enter a valid email address",
-      "resetLinkFailed": "Failed to send reset link",
-      "fetchInventoryStats": "Error fetching inventory stats:",
-      "fetchCategoryRevenue": "Error fetching category revenue:",
-      "fetchData": "Error fetching data:",
-      "scanFailed": "Failed to scan product",
-      "navigationFailed": "Navigation failed"
+      "add_photo": "Add Photo",
+      "upload_images": "Upload Images",
+      "cancel": "Cancel",
+      "add_product": "Add Product",
+      "processing": "Processing...",
+      "take_picture": "Take Picture"
     },
     "messages": {
-      "loadingUserData": "Loading user data..."
+      "drag_drop": "Or drag & drop images here (max 5 images)",
+      "image_compression": "Images will be compressed to ~500KB",
+      "max_images": "Max 5 images allowed.",
+      "image_files_only": "Only image files allowed.",
+      "camera_error": "Could not access the camera. Please make sure you've granted camera permissions.",
+      "fill_field": "Please fill in {{field}}",
+      "upload_one_image": "Upload at least 1 image.",
+      "product_added": "Product added 🎉",
+      "error": "Error: {{message}}"
     },
-    "warnings": {
-      "usingMockData": "Using mock data due to connection issues",
-      "cacheExpired": "Cache expired, refreshing data",
-      "scannerUnavailable": "Scanner temporarily unavailable"
+    "camera": {
+      "choose_source": "Choose image source:\nOK = Camera\nCancel = Gallery"
+    }
+  },
+  "update_product_modal": {
+    "title": "Mettre à jour le produit",
+    "fields": {
+      "title": "Titre",
+      "imei": "IMEI",
+      "price": "Prix (MAD)",
+      "stock": "Stock",
+      "category": "catégorie",
+      "brand": "marque",
+      "description": "Description",
+      "select_placeholder": "Sélectionner {{field}}"
+    },
+    "conditions": {
+      "new": "neuf",
+      "used": "occasion"
+    },
+    "image_upload": {
+      "click_or_drag": "Cliquez ou faites glisser pour télécharger",
+      "max_images": "Maximum 5 images au total.",
+      "only_images": "Seules les images sont autorisées.",
+      "max_size": "Maximum 2MB par image."
+    },
+    "buttons": {
+      "cancel": "Annuler",
+      "save_changes": "Enregistrer les modifications",
+      "updating": "Mise à jour..."
+    },
+    "alerts": {
+      "delete_failed": "Échec de la suppression",
+      "missing_field": "Manquant : {{field}}",
+      "max_images_allowed": "Maximum 5 images autorisées.",
+      "updated_success": "Mis à jour ✅",
+      "error": "Erreur : {{message}}"
+    }
+  },
+  "brands": [
+    "Apple",
+    "Samsung",
+    "Google",
+    "Huawei",
+    "Xiaomi",
+    "OnePlus",
+    "Sony",
+    "LG",
+    "Nokia",
+    "Oppo",
+    "Vivo",
+    "Motorola",
+    "Asus",
+    "HTC",
+    "Lenovo"
+  ],
+  "categories": ["Phone", "Accessory", "Pc", "Tablet"],
+  "trade_flow": {
+    "title": "Trade-In Center",
+    "subtitle": "Exchange old devices for new ones seamlessly",
+    "steps": {
+      "find_old_device": "Find Old Device",
+      "select_new_device": "Select New Device",
+      "set_pricing": "Set Pricing"
+    },
+    "labels": {
+      "enter_old_imei": "Enter Old Phone IMEI",
+      "enter_new_imei": "Enter New Phone IMEI",
+      "buyback_price": "Buyback Price (What you pay for old device)",
+      "sell_price": "Sell Price (What client pays for new device)",
+      "new_device_cost": "New device cost:",
+      "buyback_payment": "Buyback payment:",
+      "client_pays": "Client pays:",
+      "your_profit": "Your Profit:"
+    },
+    "buttons": {
+      "search": "Search",
+      "load": "Load",
+      "complete_trade": "Complete Trade",
+      "processing_trade": "Processing Trade..."
+    },
+    "placeholders": {
+      "imei": "Enter IMEI number...",
+      "price": "e.g. 1500"
+    },
+    "currency": "DH",
+    "transaction_summary": "Transaction Summary",
+    "toasts": {
+      "no_sale_found": "❌ No sale found for this IMEI",
+      "old_phone_found": "✅ Old phone found",
+      "imei_must_differ": "⚠️ New IMEI must be different",
+      "product_not_found": "📦 New product not found or out of stock",
+      "new_product_loaded": "✅ New product loaded",
+      "complete_fields": "🚫 Complete all fields correctly",
+      "trade_failed": "❌ Trade failed, try again",
+      "trade_completed": "🎉 Trade completed!"
+    },
+    "product_info": {
+      "sold": "Sold {{time}} to {{name}}",
+      "original_price": "Original Price: {{price}} dh",
+      "available_in_stock": "Available in stock",
+      "buy_price": "Buy Price: {{price}} dh"
+    }
+  },
+  "external_trade_flow": {
+    "title": "External Trade Flow",
+    "subtitle": "Trade external devices with inventory",
+    "steps": {
+      "find_external_device": "Find External Device",
+      "select_new_device": "Select New Device",
+      "set_pricing": "Set Pricing"
+    },
+    "labels": {
+      "enter_external_imei": "Enter External Device IMEI",
+      "enter_new_imei": "Enter New Device IMEI",
+      "buyback_price": "Buyback Price (What you pay for old device)",
+      "sell_price": "Sell Price (What customer pays for new device)",
+      "new_device_cost": "New Device Cost",
+      "buyback_payment": "Buyback Payment",
+      "client_pays": "Client Pays",
+      "your_profit": "Your Profit"
+    },
+    "placeholders": {
+      "imei": "Enter IMEI number...",
+      "price": "0.00"
+    },
+    "buttons": {
+      "search": "Search",
+      "load": "Load",
+      "processing_trade": "Processing Trade...",
+      "complete_external_trade": "Complete External Trade"
+    },
+    "product_info": {
+      "available_in_stock": "Available in stock",
+      "catalog_price": "Catalog Price: {{price}} MAD",
+      "buy_price": "Buy Price: {{price}} MAD"
+    },
+    "transaction_summary": "Transaction Summary",
+    "currency": "MAD",
+    "toasts": {
+      "old_product_not_found": "External device not found in catalog",
+      "old_product_found": "External device found in catalog",
+      "product_not_found": "Product not available in stock",
+      "new_product_loaded": "New product loaded successfully",
+      "imei_must_differ": "New device IMEI must be different from old device",
+      "complete_fields": "Please complete all required fields",
+      "trade_failed": "Trade failed. Please try again",
+      "trade_completed": "External trade completed successfully!"
     }
   }
+}

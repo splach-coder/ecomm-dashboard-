@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import supabase from "../lib/supabaseClient";
 
-// Mock data for demonstration
 const mockProducts = [
   {
     id: "1",
@@ -65,6 +64,8 @@ const mockSells = [
     id: "1",
     product_id: "1",
     sell_price: 920,
+    paid_price: 500,
+    rest_price: 420,
     buyer_name: "John Doe",
     created_at: "2024-06-15T10:30:00Z",
   },
@@ -72,6 +73,8 @@ const mockSells = [
     id: "2",
     product_id: "3",
     sell_price: 35,
+    paid_price: 35,
+    rest_price: 0,
     buyer_name: "Jane Smith",
     created_at: "2024-06-15T14:20:00Z",
   },
@@ -79,6 +82,8 @@ const mockSells = [
     id: "3",
     product_id: "2",
     sell_price: 780,
+    paid_price: 400,
+    rest_price: 380,
     buyer_name: "Mike Johnson",
     created_at: "2024-06-14T16:45:00Z",
   },
@@ -123,9 +128,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
-  // Cache management
   const [cache, setCache] = useState({});
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  const CACHE_DURATION = 5 * 60 * 1000;
 
   const fetchInventoryStats = async () => {
     try {
@@ -135,26 +139,25 @@ function Dashboard() {
       
       if (error) throw error;
 
-      const stats = data.reduce((acc, product) => {
+      const stats = data.reduce((accumulator, product) => {
         const category = product.category;
-        if (!acc[category]) {
-          acc[category] = 0;
+        if (!accumulator[category]) {
+          accumulator[category] = 0;
         }
-        acc[category] += product.in_stock;
-        return acc;
+        accumulator[category] += product.in_stock;
+        return accumulator;
       }, {});
 
       setInventoryStats(stats);
     } catch (error) {
       console.error(t('errors.fetchInventoryStats'), error);
-      // Fallback to mock data calculation
-      const mockStats = mockProducts.reduce((acc, product) => {
+      const mockStats = mockProducts.reduce((accumulator, product) => {
         const category = product.category;
-        if (!acc[category]) {
-          acc[category] = 0;
+        if (!accumulator[category]) {
+          accumulator[category] = 0;
         }
-        acc[category] += product.in_stock;
-        return acc;
+        accumulator[category] += product.in_stock;
+        return accumulator;
       }, {});
       setInventoryStats(mockStats);
     }
@@ -162,18 +165,18 @@ function Dashboard() {
 
   const fetchCategoryRevenue = async () => {
     try {
-      // Get revenue from sells with product category
       const { data: sellsData, error: sellsError } = await supabase
         .from('sells')
         .select(`
           sell_price,
+          paid_price,
+          rest_price,
           created_at,
           products!inner(category, price)
         `);
 
       if (sellsError) throw sellsError;
 
-      // Get revenue from trades with product category
       const { data: tradesData, error: tradesError } = await supabase
         .from('trades')
         .select(`
@@ -184,7 +187,6 @@ function Dashboard() {
 
       if (tradesError) throw tradesError;
 
-      // Filter data based on time range
       const now = new Date();
       let startDate;
 
@@ -198,39 +200,42 @@ function Dashboard() {
         case "month":
           startDate = new Date(now.getFullYear(), now.getMonth(), 1);
           break;
+        case "three_months":
+          startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+          break;
+        case "year":
+          startDate = new Date(now.getFullYear(), 0, 1);
+          break;
         default:
           startDate = new Date(0);
       }
 
-      // Calculate sells profit by category
       const sellsProfitByCategory = sellsData
         .filter(sell => new Date(sell.created_at) >= startDate)
-        .reduce((acc, sell) => {
+        .reduce((accumulator, sell) => {
           const category = sell.products.category;
           const profit = Number(sell.sell_price) - Number(sell.products.price);
           
-          if (!acc[category]) {
-            acc[category] = 0;
+          if (!accumulator[category]) {
+            accumulator[category] = 0;
           }
-          acc[category] += profit;
-          return acc;
+          accumulator[category] += profit;
+          return accumulator;
         }, {});
 
-      // Calculate trades profit by category
       const tradesProfitByCategory = tradesData
         .filter(trade => new Date(trade.created_at) >= startDate)
-        .reduce((acc, trade) => {
+        .reduce((accumulator, trade) => {
           const category = trade.products.category;
           const profit = Number(trade.profit);
           
-          if (!acc[category]) {
-            acc[category] = 0;
+          if (!accumulator[category]) {
+            accumulator[category] = 0;
           }
-          acc[category] += profit;
-          return acc;
+          accumulator[category] += profit;
+          return accumulator;
         }, {});
 
-      // Combine sells and trades profit
       const combinedRevenue = {};
       const allCategories = new Set([
         ...Object.keys(sellsProfitByCategory),
@@ -244,7 +249,6 @@ function Dashboard() {
       setCategoryRevenue(combinedRevenue);
     } catch (error) {
       console.error(t('errors.fetchCategoryRevenue'), error);
-      // Fallback to mock data calculation
       const mockCategoryRevenue = {
         phones: 150,
         accessories: 50
@@ -257,7 +261,6 @@ function Dashboard() {
     const cacheKey = `dashboard_${timeRange}`;
     const now = Date.now();
 
-    // Check cache first
     if (
       useCache &&
       cache[cacheKey] &&
@@ -273,7 +276,6 @@ function Dashboard() {
 
     setLoading(true);
     try {
-      // Replace with actual supabase calls
       const productsResponse = await supabase.from("products").select("*");
       const sellsResponse = await supabase.from("sells").select("*");
       const tradesResponse = await supabase.from("trades").select("*");
@@ -284,9 +286,8 @@ function Dashboard() {
         trades: tradesResponse.data || mockTrades,
       };
 
-      // Update cache
-      setCache((prev) => ({
-        ...prev,
+      setCache((previous) => ({
+        ...previous,
         [cacheKey]: {
           data: fetchedData,
           timestamp: now,
@@ -298,12 +299,10 @@ function Dashboard() {
       setTrades(fetchedData.trades);
       setLastUpdate(new Date());
 
-      // Fetch additional data
       await fetchInventoryStats();
       await fetchCategoryRevenue();
     } catch (error) {
       console.error(t('errors.fetchData'), error);
-      // Fallback to mock data
       setProducts(mockProducts);
       setSells(mockSells);
       setTrades(mockTrades);
@@ -317,15 +316,13 @@ function Dashboard() {
     fetchData();
   }, [timeRange]);
 
-  // Auto-refresh every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchData(false); // Force refresh without cache
+      fetchData(false);
     }, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [timeRange]);
 
-  // Filter data based on time range
   const filteredData = useMemo(() => {
     const now = new Date();
     let startDate;
@@ -339,6 +336,12 @@ function Dashboard() {
         break;
       case "month":
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case "three_months":
+        startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+        break;
+      case "year":
+        startDate = new Date(now.getFullYear(), 0, 1);
         break;
       default:
         startDate = new Date(0);
@@ -354,7 +357,6 @@ function Dashboard() {
     return { sells: filteredSells, trades: filteredTrades };
   }, [sells, trades, timeRange]);
 
-  // Calculate metrics
   const metrics = useMemo(() => {
     const { sells: filteredSells, trades: filteredTrades } = filteredData;
 
@@ -373,31 +375,37 @@ function Dashboard() {
       0
     );
     const sellsProfit = filteredSells.reduce((sum, sell) => {
-      const product = products.find((p) => p.id === sell.product_id);
+      const product = products.find((product) => product.id === sell.product_id);
       return (
         sum + (Number(sell.sell_price) - (product ? Number(product.price) : 0))
       );
     }, 0);
     const totalProfit = tradesProfit + sellsProfit;
 
+    const totalRestPrice = filteredSells.reduce(
+      (sum, sell) => sum + Number(sell.rest_price || 0),
+      0
+    );
+
     const profitMargin =
       totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
-    const avgSalePrice =
+    const averageSalePrice =
       filteredSells.length > 0 ? sellsRevenue / filteredSells.length : 0;
-    const avgTradeProfit =
+    const averageTradeProfit =
       filteredTrades.length > 0 ? tradesProfit / filteredTrades.length : 0;
 
     const inventoryValue = products.reduce(
-      (sum, p) => sum + Number(p.price) * p.in_stock,
+      (sum, product) => sum + Number(product.price) * product.in_stock,
       0
     );
 
     return {
       totalRevenue,
       totalProfit,
+      totalRestPrice,
       profitMargin,
-      avgSalePrice,
-      avgTradeProfit,
+      averageSalePrice,
+      averageTradeProfit,
       totalTransactions: filteredSells.length + filteredTrades.length,
       inventoryValue,
     };
@@ -409,12 +417,19 @@ function Dashboard() {
     icon: Icon,
     trend,
     color = "bg-tumbleweed",
+    additionalValue,
+    additionalLabel,
   }) => (
     <div className="bg-white p-6 rounded-lg shadow-md border border-fog/20">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-grey text-sm font-medium">{title}</p>
           <p className="text-2xl font-bold text-oceanblue mt-1">{value}</p>
+          {additionalValue && additionalLabel && (
+            <p className="text-sm text-grey mt-1">
+              {additionalLabel}: <span className="font-medium">{additionalValue}</span>
+            </p>
+          )}
           {trend && (
             <div
               className={`flex items-center mt-2 text-sm ${
@@ -462,7 +477,6 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex overflow-hidden">
-      {/* Sidebar for larger screens */}
       <div className="hidden lg:block fixed h-full">
         <Sidebar
           isOpen={isOpen}
@@ -472,7 +486,6 @@ function Dashboard() {
         />
       </div>
 
-      {/* BottomNavigation for mobile screens */}
       <div className="block lg:hidden">
         <BottomNavigation
           activeItem={activeItem}
@@ -487,7 +500,6 @@ function Dashboard() {
 
         <div className="min-h-screen bg-fog/10 p-6 pb-28 md:pb-6">
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
             <div className="flex flex-col md:flex-row items-center justify-between mb-8">
               <div className="mb-6 lg:mb-0">
                 <h1 className="text-2xl lg:text-3xl font-bold text-oceanblue">
@@ -498,14 +510,13 @@ function Dashboard() {
                 </p>
               </div>
 
-              <div className="flex md:items-center items-end justify-end md:justify-normal space-x-4">
-                {/* Time Range Selector */}
+              <div className="flex flex-col gap-2 md:flex-row md:items-center items-end justify-end md:justify-normal space-x-4">
                 <div className="flex bg-white rounded-lg shadow-md border border-fog/20">
-                  {["today", "week", "month"].map((range) => (
+                  {["today", "week", "month", "three_months", "year"].map((range) => (
                     <button
                       key={range}
                       onClick={() => setTimeRange(range)}
-                      className={`px-4 py-2 text-sm font-medium capitalize rounded-lg transition-colors ${
+                      className={`px-4 py-2 text-[10px] md:text-sm font-medium capitalize rounded-lg transition-colors ${
                         timeRange === range
                           ? "bg-tumbleweed text-white"
                           : "text-grey hover:text-oceanblue hover:bg-fog/10"
@@ -516,7 +527,6 @@ function Dashboard() {
                   ))}
                 </div>
 
-                {/* Refresh Button */}
                 <button
                   onClick={() => fetchData(false)}
                   disabled={loading}
@@ -529,12 +539,10 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Last Update */}
             <div className="text-right text-sm text-grey mb-6">
               {t('labels.lastUpdated')}: {lastUpdate.toLocaleTimeString()}
             </div>
 
-            {/* Main Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <StatCard
                 title={t('labels.metrics.totalRevenue')}
@@ -547,6 +555,12 @@ function Dashboard() {
                 value={`${metrics.totalProfit.toLocaleString()} ${t('labels.currency')}`}
                 icon={TrendingUp}
                 color="bg-oceanblue"
+              />
+              <StatCard
+                value={`${metrics.totalRestPrice.toLocaleString()} ${t('labels.currency')}`}
+                title={t('labels.metrics.restPrice')}
+                icon={DollarSign}
+                color="bg-red-800"
               />
               <StatCard
                 title={t('labels.metrics.profitMargin')}
@@ -562,17 +576,16 @@ function Dashboard() {
               />
             </div>
 
-            {/* Secondary Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <StatCard
-                title={t('labels.metrics.avgSalePrice')}
-                value={`${metrics.avgSalePrice.toFixed(0)} ${t('labels.currency')}`}
+                title={t('labels.metrics.averageSalePrice')}
+                value={`${metrics.averageSalePrice.toFixed(0)} ${t('labels.currency')}`}
                 icon={DollarSign}
                 color="bg-moderatelybrown"
               />
               <StatCard
-                title={t('labels.metrics.avgTradeProfit')}
-                value={`${metrics.avgTradeProfit.toFixed(0)} ${t('labels.currency')}`}
+                title={t('labels.metrics.averageTradeProfit')}
+                value={`${metrics.averageTradeProfit.toFixed(0)} ${t('labels.currency')}`}
                 icon={TrendingUp}
                 color="bg-tumbleweed"
               />
@@ -584,7 +597,6 @@ function Dashboard() {
               />
             </div>
 
-            {/* Revenue Breakdown */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <div className="bg-white p-6 rounded-lg shadow-md border border-fog/20">
                 <h3 className="text-lg font-semibold text-oceanblue mb-4">
@@ -633,7 +645,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Performance Indicators */}
             <div className="bg-white p-6 rounded-lg shadow-md border border-fog/20">
               <h3 className="text-lg font-semibold text-oceanblue mb-4">
                 {t('titles.keyPerformanceIndicators')}

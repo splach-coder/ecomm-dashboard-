@@ -1,114 +1,490 @@
 {
-    "profile_settings": "Paramètres du profil",
-    "manage_your_account_information_and_preferences": "Gérez les informations et préférences de votre compte",
-    "english": "Anglais",
-    "français": "Français",
-    "العربية": "Arabe",
-    "loading_user_data...": "Chargement des données utilisateur...",
-    "personal_information": "Informations personnelles",
-    "your_personal_details_and_information": "Vos informations personnelles",
-    "first_name": "Prénom",
-    "last_name": "Nom",
-    "email_address": "Adresse e-mail",
-    "account_settings": "Paramètres du compte",
-    "manage_your_account_preferences_and_security": "Gérez les préférences et la sécurité de votre compte",
-    "sign_out": "Se déconnecter",
-    "user_profile": "Profil utilisateur",
-    "navigation": {
-      "home": "Accueil",
-      "products": "Produits",
-      "sales": "Ventes",
-      "profile": "Profil"
+  "profile_settings": "Paramètres du profil",
+  "manage_your_account_information_and_preferences": "Gérez les informations et préférences de votre compte",
+  "english": "Anglais",
+  "français": "Français",
+  "العربية": "Arabe",
+  "loading_user_data...": "Chargement des données utilisateur...",
+  "personal_information": "Informations personnelles",
+  "your_personal_details_and_information": "Vos informations personnelles",
+  "first_name": "Prénom",
+  "last_name": "Nom",
+  "email_address": "Adresse e-mail",
+  "account_settings": "Paramètres du compte",
+  "manage_your_account_preferences_and_security": "Gérez les préférences et la sécurité de votre compte",
+  "sign_out": "Se déconnecter",
+  "user_profile": "Profil utilisateur",
+  "navigation": {
+    "home": "Accueil",
+    "products": "Produits",
+    "sales": "Ventes",
+    "profile": "Profil"
+  },
+  "titles": {
+    "loginAccount": "Connectez-vous à votre compte",
+    "createAccount": "Créer un compte",
+    "phoneStoreDashboard": "Tableau de Bord du Magasin de Téléphones",
+    "revenueByCategory": "Revenus par Catégorie",
+    "inventoryStatus": "État du Stock",
+    "keyPerformanceIndicators": "Indicateurs Clés de Performance",
+    "options": "Options",
+    "navigation": "Navigation"
+  },
+  "labels": {
+    "websiteLogo": "logo du site web",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "contactOwner": "Veuillez contacter le propriétaire",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "loginHere": "Se connecter",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetLinkSent": "Lien de réinitialisation envoyé !",
+    "agreeToTerms": "J'accepte les",
+    "termsConditions": "Conditions Générales",
+    "processing": "Traitement en cours...",
+    "orRegisterWith": "Ou s'inscrire avec",
+    "businessOverview": "Vue d'ensemble et analyses en temps réel de l'entreprise",
+    "lastUpdated": "Dernière mise à jour",
+    "currency": "MAD",
+    "units": "unités",
+    "categoryInStock": "{{category}} en Stock",
+    "smartphone": "Smartphone",
+    "smartphoneScannedDescription": "Ceci est un smartphone scanné via code-barres IMEI",
+    "tradeProductInternal": "Échanger un Produit Interne",
+    "tradeProductExternal": "Échanger un Produit Externe",
+    "tradeProductDescription": "Listez votre article pour l'échange",
+    "buyProduct": "Acheter un Produit",
+    "buyProductDescription": "Parcourir les articles à acheter",
+    "timeRange": {
+      "today": "Aujourd'hui",
+      "week": "Semaine",
+      "month": "Mois",
+      "three_months": "3 Mois",
+      "year": "1 An"
     },
-    "titles": {
-      "loginAccount": "Connectez-vous à votre compte",
-      "createAccount": "Créer un compte",
-      "phoneStoreDashboard": "Tableau de Bord du Magasin de Téléphones",
-      "revenueByCategory": "Revenus par Catégorie",
-      "inventoryStatus": "État du Stock",
-      "keyPerformanceIndicators": "Indicateurs Clés de Performance",
-      "options": "Options",
-      "navigation": "Navigation"
+    "categories": {
+      "Phone": "Téléphones",
+      "accessories": "Accessoires",
+      "Monitor": "Monitor"
     },
-    "labels": {
-      "websiteLogo": "logo du site web",
-      "noAccount": "Vous n'avez pas de compte ?",
-      "contactOwner": "Veuillez contacter le propriétaire",
-      "haveAccount": "Vous avez déjà un compte ?",
-      "loginHere": "Se connecter",
-      "rememberMe": "Se souvenir de moi",
-      "forgotPassword": "Mot de passe oublié ?",
-      "resetLinkSent": "Lien de réinitialisation envoyé !",
-      "agreeToTerms": "J'accepte les",
-      "termsConditions": "Conditions Générales",
-      "processing": "Traitement en cours...",
-      "orRegisterWith": "Ou s'inscrire avec",
-      "businessOverview": "Vue d'ensemble et analyses en temps réel de l'entreprise",
-      "lastUpdated": "Dernière mise à jour",
-      "currency": "MAD",
-      "units": "unités",
-      "categoryInStock": "{{category}} en Stock",
-      "smartphone": "Smartphone",
-      "smartphoneScannedDescription": "Ceci est un smartphone scanné via code-barres IMEI",
-      "tradeProduct": "Échanger un Produit",
-      "tradeProductDescription": "Listez votre article pour l'échange",
-      "buyProduct": "Acheter un Produit",
-      "buyProductDescription": "Parcourir les articles à acheter",
-      "timeRange": {
-        "today": "Aujourd'hui",
-        "week": "Semaine",
-        "month": "Mois"
+    "metrics": {
+      "totalRevenue": "Chiffre d'Affaires Total",
+      "totalProfit": "Profit Total",
+      "profitMargin": "Marge Bénéficiaire",
+      "transactions": "Transactions",
+      "averageSalePrice": "Prix de Vente Moyen",
+      "averageTradeProfit": "Profit d'Échange Moyen",
+      "inventoryValue": "Valeur du Stock",
+      "totalSales": "Ventes Totales",
+      "restPrice": "Prix Restant"
+    }
+  },
+  "placeholders": {
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "email": "Email",
+    "password": "Entrez votre mot de passe"
+  },
+  "buttons": {
+    "login": "Se connecter",
+    "createAccount": "Créer un compte",
+    "continueWithGoogle": "Continuer avec Google"
+  },
+  "success": {
+    "accountCreated": "Compte créé avec succès ! Veuillez vous connecter.",
+    "resetLinkSent": "Lien de réinitialisation du mot de passe envoyé ! Vérifiez votre email.",
+    "dataRefreshed": "Données actualisées avec succès",
+    "cacheClear": "Cache vidé avec succès",
+    "productScanned": "Produit scanné avec succès",
+    "navigationSuccessful": "Navigation terminée"
+  },
+  "errors": {
+    "emailRequired": "Veuillez entrer votre adresse email",
+    "invalidEmail": "Veuillez entrer une adresse email valide",
+    "resetLinkFailed": "Échec de l'envoi du lien de réinitialisation",
+    "fetchInventoryStats": "Erreur lors de la récupération des statistiques d'inventaire:",
+    "fetchCategoryRevenue": "Erreur lors de la récupération des revenus par catégorie:",
+    "fetchData": "Erreur lors de la récupération des données:",
+    "scanFailed": "Échec du scan du produit",
+    "navigationFailed": "Échec de la navigation"
+  },
+  "messages": {
+    "loadingUserData": "Chargement des données utilisateur..."
+  },
+  "warnings": {
+    "usingMockData": "Utilisation de données fictives en raison de problèmes de connexion",
+    "cacheExpired": "Cache expiré, actualisation des données",
+    "scannerUnavailable": "Scanner temporairement indisponible"
+  },
+  "product_management": {
+    "title": "Gestion des Produits",
+    "subtitle": "Gérez votre inventaire",
+    "add_product": "Ajouter un Produit",
+    "view": {
+      "grid": "Vue Grille",
+      "table": "Vue Tableau"
+    },
+    "filters": {
+      "title": "Filtres",
+      "stock_status": "Statut du Stock",
+      "category": "Catégorie",
+      "condition": "État",
+      "brand": "Marque",
+      "price_range": "Tranche de Prix",
+      "all_categories": "Toutes Catégories",
+      "all_conditions": "Tous États",
+      "all_brands": "Toutes Marques",
+      "reset": "Réinitialiser",
+      "apply": "Appliquer"
+    },
+    "search": {
+      "placeholder": "Rechercher des produits..."
+    },
+    "pagination": {
+      "show": "Afficher",
+      "per_page": "par page",
+      "showing": "Affichage de {{current}} sur {{total}} produits"
+    },
+    "table": {
+      "headers": {
+        "product": "Produit",
+        "category": "Catégorie",
+        "brand": "Marque",
+        "condition": "État",
+        "price": "Prix",
+        "stock": "Stock",
+        "imei": "IMEI"
+      }
+    },
+    "stock_status": {
+      "in_stock": "En Stock",
+      "out_of_stock": "En Rupture",
+      "all": "Tous",
+      "count": "{{count}} en stock"
+    },
+    "conditions": {
+      "new": "Neuf",
+      "used": "Occasion"
+    },
+    "price_ranges": {
+      "all": "Tous Prix",
+      "0-500": "Moins de 500 MAD",
+      "500-2000": "500-2000 MAD",
+      "2000-5000": "2000-5000 MAD",
+      "5000+": "Plus de 5000 MAD"
+    }
+  },
+  "product_detail": {
+    "back_to_products": "Retour aux produits",
+    "copy_product": "Copier le produit",
+    "copying": "Copie en cours :",
+    "number_of_copies": "Nombre de copies",
+    "imei_codes": "Codes IMEI",
+    "imei_code": "Code IMEI {{index}}",
+    "cancel": "Annuler",
+    "copy_products": "Copier {{count}} produits",
+    "copying_loading": "Copie en cours...",
+    "product_info": "Informations sur le produit",
+    "supplier_information": "Informations sur le fournisseur",
+    "name": "Nom",
+    "phone": "Téléphone",
+    "description": "Description",
+    "quantity": "Quantité",
+    "created": "Créé",
+    "updated": "Mis à jour",
+    "last_updated": "Dernière mise à jour",
+    "product_id": "ID du produit",
+    "stock_quantity": "Quantité en stock",
+    "units": "unités",
+    "price": "Prix",
+    "sell_product": "Vendre le produit",
+    "modify_product": "Modifier le produit",
+    "out_of_stock": "En rupture de stock",
+    "status": {
+      "new": "Neuf",
+      "used": "Occasion",
+      "brand_new": "Neuf",
+      "pre_owned": "D'occasion",
+      "in_stock": "En stock",
+      "out_of_stock": "En rupture de stock",
+      "only_x_left": "Il ne reste que {{count}}"
+    },
+    "errors": {
+      "fill_all_imei": "Veuillez remplir tous les codes IMEI",
+      "imei_unique": "Les codes IMEI doivent être uniques",
+      "copy_failed": "Échec de la copie des produits. Veuillez réessayer.",
+      "error_copying": "Une erreur s'est produite lors de la copie des produits.",
+      "copy_success": "{{count}} copies de produits créées avec succès !",
+      "cannot_sell": "Impossible de vendre le produit - En rupture de stock !"
+    }
+  },
+  "loading": "Chargement...",
+  "loading_user_data": "Chargement des données utilisateur...",
+  "sell_form": {
+    "title": "Vendre le produit",
+    "confirm_title": "Confirmer la vente",
+    "confirm_message": "Êtes-vous sûr de vouloir vendre ce produit à <strong>{{name}}</strong> ?",
+    "sale_price": "Prix de vente :",
+    "paid_amount": "Montant payé :",
+    "remaining": "Reste à payer :",
+    "cancel": "Annuler",
+    "confirm_sale": "Confirmer la vente",
+    "processing": "Traitement...",
+    "fields": {
+      "buyer_name": "Nom complet de l'acheteur",
+      "buyer_name_placeholder": "Entrez le nom complet de l'acheteur",
+      "phone": "Numéro de téléphone",
+      "phone_placeholder": "Entrez le numéro de téléphone de l'acheteur",
+      "sale_price": "Prix de vente (MAD)",
+      "sale_price_placeholder": "0.00",
+      "paid_amount": "Montant payé (MAD)",
+      "paid_amount_placeholder": "0.00",
+      "remaining_amount": "Montant restant (MAD)",
+      "remaining_placeholder": "Calculé automatiquement",
+      "optional": "(optionnel)"
+    },
+    "buttons": {
+      "sell_product": "Vendre le produit"
+    }
+  },
+  "sales_transactions": {
+    "title": "Transactions de vente et d'échange",
+    "start_date": "Date de début",
+    "end_date": "Date de fin",
+    "clear_filters": "Effacer les filtres",
+    "showing_results": "Affichage de {{count}} sur {{total}} transactions",
+    "no_transactions": {
+      "title": "Aucune transaction",
+      "description": "Vous n'avez effectué aucune transaction pour le moment.",
+      "filtered_description": "Aucune transaction ne correspond à votre plage de dates sélectionnée."
+    },
+    "summary": {
+      "transactions": "Transactions",
+      "total_sales": "Ventes totales",
+      "total_profit": "Bénéfice total",
+      "sale": "Vente",
+      "trade": "Échange",
+      "view": "Voir"
+    },
+    "table": {
+      "product": "Produit",
+      "buyer": "Acheteur",
+      "date": "Date",
+      "sale_price": "Prix de vente",
+      "profit": "Profit",
+      "type": "Type",
+      "actions": "Actions"
+    },
+    "details": {
+      "title": {
+        "sale": "Détails de la vente",
+        "trade": "Détails de l'échange"
       },
-      "categories": {
-        "Phone": "Téléphones",
-        "accessories": "Accessoires"
-      },
-      "metrics": {
-        "totalRevenue": "Chiffre d'Affaires Total",
-        "totalProfit": "Profit Total",
-        "profitMargin": "Marge Bénéficiaire",
-        "transactions": "Transactions",
-        "avgSalePrice": "Prix de Vente Moyen",
-        "avgTradeProfit": "Profit d'Échange Moyen",
-        "inventoryValue": "Valeur du Stock",
-        "totalSales": "Ventes Totales"
+      "product": "Produit",
+      "original_price": "Prix d'origine",
+      "traded_product": "Produit échangé",
+      "buyback_price": "Prix de rachat",
+      "buyer_info": "Informations sur l'acheteur",
+      "name": "Nom",
+      "phone": "Téléphone",
+      "transaction_details": "Détails de la transaction",
+      "sale_price": "Prix de vente",
+      "user_paid": "Montant payé",
+      "trade_value": "Valeur de l'échange",
+      "transaction_id": "ID de transaction",
+      "close": "Fermer"
+    },
+    "loading": "Chargement des transactions...",
+    "error": "Une erreur s'est produite lors du chargement des transactions."
+  },
+  "add_product_modal": {
+    "title": "Ajouter un nouveau produit",
+    "fields": {
+      "title": "Titre",
+      "imei": "IMEI",
+      "price": "Prix (MAD)",
+      "in_stock": "Stock",
+      "supplier_name": "Nom du fournisseur (Optionnel)",
+      "supplier_phone": "Téléphone du fournisseur (Optionnel)",
+      "description": "Description (optionnelle)",
+      "category": "Catégorie",
+      "brand": "Marque",
+      "condition": {
+        "new": "Neuf",
+        "used": "Occasion"
       }
     },
     "placeholders": {
-      "firstName": "Prénom",
-      "lastName": "Nom de famille",
-      "email": "Email",
-      "password": "Entrez votre mot de passe"
+      "choose_category": "Choisir une catégorie",
+      "choose_brand": "Choisir une marque"
     },
     "buttons": {
-      "login": "Se connecter",
-      "createAccount": "Créer un compte",
-      "continueWithGoogle": "Continuer avec Google"
-    },
-    "success": {
-      "accountCreated": "Compte créé avec succès ! Veuillez vous connecter.",
-      "resetLinkSent": "Lien de réinitialisation du mot de passe envoyé ! Vérifiez votre email.",
-      "dataRefreshed": "Données actualisées avec succès",
-      "cacheClear": "Cache vidé avec succès",
-      "productScanned": "Produit scanné avec succès",
-      "navigationSuccessful": "Navigation terminée"
-    },
-    "errors": {
-      "emailRequired": "Veuillez entrer votre adresse email",
-      "invalidEmail": "Veuillez entrer une adresse email valide",
-      "resetLinkFailed": "Échec de l'envoi du lien de réinitialisation",
-      "fetchInventoryStats": "Erreur lors de la récupération des statistiques d'inventaire:",
-      "fetchCategoryRevenue": "Erreur lors de la récupération des revenus par catégorie:",
-      "fetchData": "Erreur lors de la récupération des données:",
-      "scanFailed": "Échec du scan du produit",
-      "navigationFailed": "Échec de la navigation"
+      "add_photo": "Ajouter une photo",
+      "upload_images": "Télécharger des images",
+      "cancel": "Annuler",
+      "add_product": "Ajouter le produit",
+      "processing": "Traitement en cours...",
+      "take_picture": "Prendre une photo"
     },
     "messages": {
-      "loadingUserData": "Chargement des données utilisateur..."
+      "drag_drop": "Ou glissez-déposez des images ici (max 5 images)",
+      "image_compression": "Les images seront compressées à ~500KB",
+      "max_images": "Maximum 5 images autorisées.",
+      "image_files_only": "Seuls les fichiers image sont autorisés.",
+      "camera_error": "Impossible d'accéder à la caméra. Veuillez vérifier que vous avez accordé les permissions.",
+      "fill_field": "Veuillez remplir le champ {{field}}",
+      "upload_one_image": "Téléchargez au moins 1 image.",
+      "product_added": "Produit ajouté 🎉",
+      "error": "Erreur : {{message}}"
     },
-    "warnings": {
-      "usingMockData": "Utilisation de données fictives en raison de problèmes de connexion",
-      "cacheExpired": "Cache expiré, actualisation des données",
-      "scannerUnavailable": "Scanner temporairement indisponible"
+    "camera": {
+      "choose_source": "Choisir la source de l'image :\nOK = Caméra\nAnnuler = Galerie"
+    }
+  },
+  "update_product_modal": {
+    "title": "Mettre à jour le produit",
+    "fields": {
+      "title": "Titre",
+      "imei": "IMEI",
+      "price": "Prix (MAD)",
+      "stock": "Stock",
+      "category": "catégorie",
+      "brand": "marque",
+      "description": "Description",
+      "select_placeholder": "Sélectionner {{field}}"
+    },
+    "conditions": {
+      "new": "neuf",
+      "used": "occasion"
+    },
+    "image_upload": {
+      "click_or_drag": "Cliquez ou faites glisser pour télécharger",
+      "max_images": "Maximum 5 images au total.",
+      "only_images": "Seules les images sont autorisées.",
+      "max_size": "Maximum 2MB par image."
+    },
+    "buttons": {
+      "cancel": "Annuler",
+      "save_changes": "Enregistrer les modifications",
+      "updating": "Mise à jour..."
+    },
+    "alerts": {
+      "delete_failed": "Échec de la suppression",
+      "missing_field": "Manquant : {{field}}",
+      "max_images_allowed": "Maximum 5 images autorisées.",
+      "updated_success": "Mis à jour ✅",
+      "error": "Erreur : {{message}}"
+    }
+  },
+  "brands": [
+    "Apple",
+    "Samsung",
+    "Google",
+    "Huawei",
+    "Xiaomi",
+    "OnePlus",
+    "Sony",
+    "LG",
+    "Nokia",
+    "Oppo",
+    "Vivo",
+    "Motorola",
+    "Asus",
+    "HTC",
+    "Lenovo"
+  ],
+  "categories": ["Phone", "Accessory", "Pc", "Tablet"],
+  "trade_flow": {
+    "title": "Centre de reprise",
+    "subtitle": "Échangez vos anciens appareils contre des neufs en toute simplicité",
+    "steps": {
+      "find_old_device": "Trouver l'appareil ancien",
+      "select_new_device": "Sélectionner un nouvel appareil",
+      "set_pricing": "Définir les prix"
+    },
+    "labels": {
+      "enter_old_imei": "Entrez l'IMEI de l'ancien téléphone",
+      "enter_new_imei": "Entrez le nouvel IMEI",
+      "buyback_price": "Prix de reprise (Ce que vous payez pour l'ancien appareil)",
+      "sell_price": "Prix de vente (Ce que le client paie pour le nouvel appareil)",
+      "new_device_cost": "Coût du nouvel appareil :",
+      "buyback_payment": "Paiement de reprise :",
+      "client_pays": "Le client paie :",
+      "your_profit": "Votre bénéfice :"
+    },
+    "buttons": {
+      "search": "Rechercher",
+      "load": "Charger",
+      "complete_trade": "Finaliser l'échange",
+      "processing_trade": "Traitement de l'échange..."
+    },
+    "placeholders": {
+      "imei": "Entrez le numéro IMEI...",
+      "price": "ex. 1500"
+    },
+    "currency": "DH",
+    "transaction_summary": "Résumé de la transaction",
+    "toasts": {
+      "no_sale_found": "❌ Aucune vente trouvée pour cet IMEI",
+      "old_phone_found": "✅ Ancien téléphone trouvé",
+      "imei_must_differ": "⚠️ Le nouvel IMEI doit être différent",
+      "product_not_found": "📦 Nouveau produit introuvable ou en rupture de stock",
+      "new_product_loaded": "✅ Nouveau produit chargé",
+      "complete_fields": "🚫 Remplissez tous les champs correctement",
+      "trade_failed": "❌ L'échange a échoué, veuillez réessayer",
+      "trade_completed": "🎉 Échange terminé !"
+    },
+    "product_info": {
+      "sold": "Vendu {{time}} à {{name}}",
+      "original_price": "Prix d'origine : {{price}} dh",
+      "available_in_stock": "Disponible en stock",
+      "buy_price": "Prix d'achat : {{price}} dh"
+    }
+  },
+  "external_trade_flow": {
+    "title": "Flux d'Échange Externe",
+    "subtitle": "Échanger des appareils externes avec l'inventaire",
+    "steps": {
+      "find_external_device": "Trouver l'Appareil Externe",
+      "select_new_device": "Sélectionner un Nouvel Appareil",
+      "set_pricing": "Définir les Prix"
+    },
+    "labels": {
+      "enter_external_imei": "Saisir l'IMEI de l'Appareil Externe",
+      "enter_new_imei": "Saisir l'IMEI du Nouvel Appareil",
+      "buyback_price": "Prix de Rachat (Ce que vous payez pour l'ancien appareil)",
+      "sell_price": "Prix de Vente (Ce que le client paie pour le nouvel appareil)",
+      "new_device_cost": "Coût du Nouvel Appareil",
+      "buyback_payment": "Paiement de Rachat",
+      "client_pays": "Le Client Paie",
+      "your_profit": "Votre Bénéfice"
+    },
+    "placeholders": {
+      "imei": "Saisir le numéro IMEI...",
+      "price": "0,00"
+    },
+    "buttons": {
+      "search": "Rechercher",
+      "load": "Charger",
+      "processing_trade": "Traitement de l'Échange...",
+      "complete_external_trade": "Terminer l'Échange Externe"
+    },
+    "product_info": {
+      "available_in_stock": "Disponible en stock",
+      "catalog_price": "Prix Catalogue : {{price}} MAD",
+      "buy_price": "Prix d'Achat : {{price}} MAD"
+    },
+    "transaction_summary": "Résumé de la Transaction",
+    "currency": "MAD",
+    "toasts": {
+      "old_product_not_found": "Appareil externe non trouvé dans le catalogue",
+      "old_product_found": "Appareil externe trouvé dans le catalogue",
+      "product_not_found": "Produit non disponible en stock",
+      "new_product_loaded": "Nouveau produit chargé avec succès",
+      "imei_must_differ": "L'IMEI du nouvel appareil doit être différent de l'ancien",
+      "complete_fields": "Veuillez compléter tous les champs requis",
+      "trade_failed": "Échec de l'échange. Veuillez réessayer",
+      "trade_completed": "Échange externe terminé avec succès !"
     }
   }
+}

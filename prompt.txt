@@ -1,8 +1,139 @@
-import React, { useState, useEffect } from "react";
+m using react18n for translation 
+i will gave a part of code and extract all the text there put them in json file 
+two file en and fr
+like this format {
+    "profile_settings": "Profile Settings",
+    "manage_your_account_information_and_preferences": "Manage your account information and preferences",
+    "english": "English",
+    "français": "Français",
+    "العربية": "العربية",
+    "loading_user_data...": "Loading user data...",
+    "personal_information": "Personal Information",
+    "your_personal_details_and_information": "Your personal details and information",
+    "first_name": "First name",
+    "last_name": "Last name",
+    "email_address": "Email Address",
+    "account_settings": "Account Settings",
+    "manage_your_account_preferences_and_security": "Manage your account preferences and security",
+    "sign_out": "Sign Out",
+    "user_profile": "User Profile",
+    "navigation": {
+      "home": "Home",
+      "products": "Products",
+      "sales": "Sales",
+      "profile": "Profile"
+    },
+    "titles": {
+      "loginAccount": "Log in to your account",
+      "createAccount": "Create an account",
+      "phoneStoreDashboard": "Phone Store Dashboard",
+      "revenueByCategory": "Revenue by Category",
+      "inventoryStatus": "Inventory Status",
+      "keyPerformanceIndicators": "Key Performance Indicators",
+      "options": "Options",
+      "navigation": "Navigation"
+    },
+    "labels": {
+      "websiteLogo": "website logo",
+      "noAccount": "Don't have an account?",
+      "contactOwner": "Please contact the owner",
+      "haveAccount": "Already have an account?",
+      "loginHere": "Log in",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "resetLinkSent": "Reset link sent!",
+      "agreeToTerms": "I agree to the",
+      "termsConditions": "Terms & Conditions",
+      "processing": "Processing...",
+      "orRegisterWith": "Or register with",
+      "businessOverview": "Real-time business overview and analytics",
+      "lastUpdated": "Last updated",
+      "currency": "MAD",
+      "units": "units",
+      "categoryInStock": "{{category}} in Stock",
+      "smartphone": "Smartphone",
+      "smartphoneScannedDescription": "This is a smartphone scanned via IMEI barcode",
+      "tradeProduct": "Trade Product",
+      "tradeProductDescription": "List your item for trade",
+      "buyProduct": "Buy Product",
+      "buyProductDescription": "Browse items to purchase",
+      "timeRange": {
+        "today": "Today",
+        "week": "Week",
+        "month": "Month",
+        "three_months" : "3 Month",
+        "year" : "1 Year"
+      },
+      "categories": {
+        "Phone": "Phones",
+        "accessories": "Accessories",
+        "Monitor" : "Monitor"
+      },
+      "metrics": {
+        "totalRevenue": "Total Revenue",
+        "totalProfit": "Total Profit",
+        "profitMargin": "Profit Margin",
+        "transactions": "Transactions",
+        "averageSalePrice": "Avg Sale Price",
+        "averageTradeProfit": "Avg Trade Profit",
+        "inventoryValue": "Inventory Value",
+        "totalSales": "Total Sales",
+        "restPrice": "Rest Price"
+      }
+    },
+    "placeholders": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Enter your password"
+    },
+    "buttons": {
+      "login": "Log in",
+      "createAccount": "Create account",
+      "continueWithGoogle": "Continue with Google"
+    },
+    "success": {
+      "accountCreated": "Account created successfully! Please log in.",
+      "resetLinkSent": "Password reset link sent! Check your email.",
+      "dataRefreshed": "Data refreshed successfully",
+      "cacheClear": "Cache cleared successfully",
+      "productScanned": "Product scanned successfully",
+      "navigationSuccessful": "Navigation completed"
+    },
+    "errors": {
+      "emailRequired": "Please enter your email address",
+      "invalidEmail": "Please enter a valid email address",
+      "resetLinkFailed": "Failed to send reset link",
+      "fetchInventoryStats": "Error fetching inventory stats:",
+      "fetchCategoryRevenue": "Error fetching category revenue:",
+      "fetchData": "Error fetching data:",
+      "scanFailed": "Failed to scan product",
+      "navigationFailed": "Navigation failed"
+    },
+    "messages": {
+      "loadingUserData": "Loading user data..."
+    },
+    "warnings": {
+      "usingMockData": "Using mock data due to connection issues",
+      "cacheExpired": "Cache expired, refreshing data",
+      "scannerUnavailable": "Scanner temporarily unavailable"
+    }
+  } then recreate the whole code to have all the texts set ups 
+
+
+here is my code import React, { useState, useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { X, Upload } from "lucide-react";
 import supabase from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+
+
+const BRANDS = [
+  "Apple","Samsung","Google","Huawei","Xiaomi","OnePlus","Sony",
+  "LG","Nokia","Oppo","Vivo","Motorola","Asus","HTC","Lenovo"
+];
+const CATEGORIES = ["Phone", "Monitor", "Accessory"];
 
 const UpdateProductModal = ({ product, show, setShow }) => {
   const [form, setForm] = useState(product);
@@ -10,7 +141,6 @@ const UpdateProductModal = ({ product, show, setShow }) => {
   const [thumbs, setThumbs] = useState([]);
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
-  const { t } = useTranslation();
 
   useEffect(() => {
     setForm(product);
@@ -23,10 +153,10 @@ const UpdateProductModal = ({ product, show, setShow }) => {
   const handleFiles = (files) => {
     const arr = Array.from(files);
     if (form.images.length + arr.length > 5)
-      return alert(t("update_product_modal.image_upload.max_images"));
+      return alert("Max 5 images total.");
     for (const f of arr) {
-      if (!f.type.startsWith("image/")) return alert(t("update_product_modal.image_upload.only_images"));
-      if (f.size > 2 * 1024 * 1024) return alert(t("update_product_modal.image_upload.max_size"));
+      if (!f.type.startsWith("image/")) return alert("Only images allowed.");
+      if (f.size > 2 * 1024 * 1024) return alert("Max 2MB per image.");
     }
     setNewImages(arr);
     setThumbs(arr.map(file => URL.createObjectURL(file)));
@@ -37,7 +167,7 @@ const UpdateProductModal = ({ product, show, setShow }) => {
     const { error } = await supabase.storage
       .from("product-images")
       .remove([filename]);
-    if (error) return alert(t("update_product_modal.alerts.delete_failed"));
+    if (error) return alert("Delete failed");
     setForm(prev => ({
       ...prev,
       images: prev.images.filter(img => img !== url)
@@ -59,14 +189,10 @@ const UpdateProductModal = ({ product, show, setShow }) => {
   };
 
   const handleUpdate = async () => {
-    const requiredFields = ["title", "imei", "price", "in_stock", "category", "brand"];
-    for (const key of requiredFields) {
-      if (!form[key]) return alert(t("update_product_modal.alerts.missing_field", { field: key }));
-    }
-    
+    for (const key of ["title", "imei", "price", "in_stock", "category", "brand"])
+      if (!form[key]) return alert(`Missing: ${key}`);
     if (form.images.length + newImages.length > 5)
-      return alert(t("update_product_modal.alerts.max_images_allowed"));
-    
+      return alert("Max 5 images allowed.");
     try {
       setUploading(true);
       const uploaded = await uploadNewImages();
@@ -86,17 +212,19 @@ const UpdateProductModal = ({ product, show, setShow }) => {
   
       if (error) throw error;
   
-      alert(t("update_product_modal.alerts.updated_success"));
+      alert("Updated ✅");
       setShow(false);
   
+      // ⬇️ Navigate with updated product
       navigate(`/product/${updatedProduct.id}`, { state: { product: updatedProduct } });
   
     } catch (err) {
-      alert(t("update_product_modal.alerts.error", { message: err.message }));
+      alert("Error: " + err.message);
     } finally {
       setUploading(false);
     }
   };
+  
 
   return (
     <div className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity ${
@@ -110,7 +238,7 @@ const UpdateProductModal = ({ product, show, setShow }) => {
       }`}>
 
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold">{t("update_product_modal.title")}</h2>
+          <h2 className="text-xl font-semibold">Update Product</h2>
           <button onClick={() => setShow(false)} className="p-2 hover:bg-gray-100 rounded-lg">
             <X size={20}/>
           </button>
@@ -118,10 +246,8 @@ const UpdateProductModal = ({ product, show, setShow }) => {
 
         <div className="p-6 overflow-y-auto max-h-[70vh] space-y-6">
           {[
-            ["title", t("update_product_modal.fields.title")],
-            ["imei", t("update_product_modal.fields.imei")],
-            ["price", t("update_product_modal.fields.price")],
-            ["in_stock", t("update_product_modal.fields.stock")]
+            ["title","Title"],["imei","IMEI"],
+            ["price","Price (MAD)"],["in_stock","Stock"]
           ].map(([name,label])=>(
             <div key={name} className="relative">
               <input
@@ -143,8 +269,8 @@ const UpdateProductModal = ({ product, show, setShow }) => {
               value={form[name]} onChange={handleChange}
               className="block w-full px-3 py-2 border rounded bg-white"
             >
-              <option value="" disabled>{t("update_product_modal.fields.select_placeholder", { field: t(`update_product_modal.fields.${name}`) })}</option>
-              {(name==="brand"?t("brands", { returnObjects: true }):t("categories", { returnObjects: true })).map(opt=>(
+              <option value="" disabled>Select {name}</option>
+              {(name==="brand"?BRANDS:CATEGORIES).map(opt=>(
                 <option key={opt}>{opt}</option>
               ))}
             </select>
@@ -157,7 +283,7 @@ const UpdateProductModal = ({ product, show, setShow }) => {
                 <input
                   type="radio" name="condition" value={val}
                   checked={form.condition === val}
-                  onChange={handleChange} /> {t(`update_product_modal.conditions.${val}`)}
+                  onChange={handleChange} /> {val}
               </label>
             ))}
           </div>
@@ -166,7 +292,7 @@ const UpdateProductModal = ({ product, show, setShow }) => {
           <textarea
             name="description" rows="3" value={form.description}
             onChange={handleChange}
-            placeholder={t("update_product_modal.fields.description")}
+            placeholder="Description"
             className="block w-full px-3 py-2 border rounded"
           />
 
@@ -195,7 +321,7 @@ const UpdateProductModal = ({ product, show, setShow }) => {
               id="updateFileInput" type="file" accept="image/*"
               multiple hidden onChange={e=>handleFiles(e.target.files)} />
             <Upload size={24} className="mx-auto text-gray-400 mb-2" />
-            <p>{t("update_product_modal.image_upload.click_or_drag")}</p>
+            <p>Click or drag to upload</p>
             {thumbs.length > 0 && (
               <div className="flex gap-2 mt-4 overflow-x-auto">
                 {thumbs.map((src,i)=>(
@@ -212,18 +338,25 @@ const UpdateProductModal = ({ product, show, setShow }) => {
             onClick={() => setShow(false)}
             className="flex-1 px-4 py-2 border rounded hover:bg-gray-50"
           >
-            {t("update_product_modal.buttons.cancel")}
+            Cancel
           </button>
           <button
             onClick={handleUpdate} disabled={uploading}
             className="flex-1 px-4 py-2 bg-tumbleweed text-white rounded hover:bg-oceanblue disabled:opacity-50"
           >
-            {uploading ? t("update_product_modal.buttons.updating") : t("update_product_modal.buttons.save_changes")}
+            {uploading ? "Updating..." : "Save Changes"}
           </button>
         </div>
+
       </div>
     </div>
   );
 };
 
 export default UpdateProductModal;
+
+
+use this import { useTranslation } from "react-i18next";
+and  const { t } = useTranslation();
+
+recreate the whole code please

@@ -1,10 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from "react-i18next";
 import { fetchSalesWithProduct, fetchTradesWithProducts } from "../features/updateProductStock";
 import { useAuth } from '../features/auth/AuthContext';
 import Sidebar from '../components/sidebar/Sidebar';
 import BottomNavigation from '../components/bottombar/BottomNavigation';
 
 const SalesTransactions = () => {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const [startDate, setStartDate] = useState('');
   const [sales, setSales] = useState([]);
@@ -58,14 +60,14 @@ const SalesTransactions = () => {
           id: trade.id,
           type: 'trade',
           product_id: trade.new_product_id,
-          product: trade.new_product, // The product given to the client
-          sell_price: trade.new_product_price, // The price of the new product
-          original_price: trade.new_product.price, // Original price of the new product
-          profit: trade.profit, // Already calculated in the trade
+          product: trade.new_product,
+          sell_price: trade.new_product_price,
+          original_price: trade.new_product.price,
+          profit: trade.profit,
           buyer_name: trade.buyer_name || 'Trade Customer',
           buyer_phone: trade.buyer_phone || 'N/A',
           created_at: trade.created_at,
-          trade_details: trade // Keep all trade details for the modal
+          trade_details: trade
         }));
         
         setTrades(formattedTrades);
@@ -141,17 +143,17 @@ const SalesTransactions = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex">
-       <div className="block lg:hidden fixed bottom-0 left-0 right-0 z-10">
-        <BottomNavigation 
-          activeItem={activeItem} 
-          onItemClick={handleItemClick} 
-          onLogout={handleLogout} 
-        />
-      </div>
+        <div className="block lg:hidden fixed bottom-0 left-0 right-0 z-10">
+          <BottomNavigation 
+            activeItem={activeItem} 
+            onItemClick={handleItemClick} 
+            onLogout={handleLogout} 
+          />
+        </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-400 mx-auto mb-4"></div>
-            <p className="text-gray-500">Loading transactions...</p>
+            <p className="text-gray-500">{t('sales_transactions.loading')}</p>
           </div>
         </div>
       </div>
@@ -163,12 +165,12 @@ const SalesTransactions = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <div className="block lg:hidden fixed bottom-0 left-0 right-0 z-10">
-        <BottomNavigation 
-          activeItem={activeItem} 
-          onItemClick={handleItemClick} 
-          onLogout={handleLogout} 
-        />
-      </div>
+          <BottomNavigation 
+            activeItem={activeItem} 
+            onItemClick={handleItemClick} 
+            onLogout={handleLogout} 
+          />
+        </div>
         <div className="flex-1 p-4">
           <div className="bg-red-50 border-l-4 border-red-500 p-4">
             <div className="flex">
@@ -178,7 +180,7 @@ const SalesTransactions = () => {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-700">{error}</p>
+                <p className="text-sm text-red-700">{t('sales_transactions.error')}: {error}</p>
               </div>
             </div>
           </div>
@@ -213,13 +215,15 @@ const SalesTransactions = () => {
         <div className="container mx-auto p-4 lg:p-6">
           {/* Header */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 className="text-2xl font-bold text-oceanblue mb-4">Sales & Trade Transactions</h1>
+            <h1 className="text-2xl font-bold text-oceanblue mb-4">
+              {t('sales_transactions.title')}
+            </h1>
             
             {/* Date Range Filter */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date
+                  {t('sales_transactions.start_date')}
                 </label>
                 <input
                   id="start-date"
@@ -231,7 +235,7 @@ const SalesTransactions = () => {
               </div>
               <div>
                 <label htmlFor="end-date" className="block text-sm font-medium text-gray-700 mb-1">
-                  End Date
+                  {t('sales_transactions.end_date')}
                 </label>
                 <input
                   id="end-date"
@@ -249,14 +253,17 @@ const SalesTransactions = () => {
                   }}
                   className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  Clear Filters
+                  {t('sales_transactions.clear_filters')}
                 </button>
               </div>
             </div>
 
             {/* Results count */}
             <div className="text-sm text-gray-500">
-              Showing {filteredTransactions.length} of {allTransactions.length} transactions
+              {t('sales_transactions.showing_results', {
+                count: filteredTransactions.length,
+                total: allTransactions.length
+              })}
             </div>
           </div>
 
@@ -270,7 +277,9 @@ const SalesTransactions = () => {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">Transactions</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    {t('sales_transactions.summary.transactions')}
+                  </dt>
                   <dd className="text-lg font-semibold text-gray-900">{totals.count}</dd>
                 </div>
               </div>
@@ -283,7 +292,9 @@ const SalesTransactions = () => {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <dt className="text-sm font-medium text-gray-500 truncate">Profit</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    {t('sales_transactions.summary.total_profit')}
+                  </dt>
                   <dd className={`text-lg font-semibold ${totals.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {totals.totalProfit >= 0 ? '+' : ''}{totals.totalProfit.toFixed(2)} MAD
                   </dd>
@@ -303,7 +314,9 @@ const SalesTransactions = () => {
                     </svg>
                   </div>
                   <div className="ml-5 w-0 flex-1">
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Transactions</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      {t('sales_transactions.summary.transactions')}
+                    </dt>
                     <dd className="text-2xl font-semibold text-gray-900">{totals.count}</dd>
                   </div>
                 </div>
@@ -318,7 +331,9 @@ const SalesTransactions = () => {
                     </svg>
                   </div>
                   <div className="ml-5 w-0 flex-1">
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Sales</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      {t('sales_transactions.summary.total_sales')}
+                    </dt>
                     <dd className="text-2xl font-semibold text-gray-900">{totals.totalSales.toFixed(2)} MAD</dd>
                   </div>
                 </div>
@@ -333,7 +348,9 @@ const SalesTransactions = () => {
                     </svg>
                   </div>
                   <div className="ml-5 w-0 flex-1">
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Profit</dt>
+                    <dt className="text-sm font-medium text-gray-500 truncate">
+                      {t('sales_transactions.summary.total_profit')}
+                    </dt>
                     <dd className={`text-2xl font-semibold ${totals.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {totals.totalProfit >= 0 ? '+' : ''}{totals.totalProfit.toFixed(2)} MAD
                     </dd>
@@ -360,11 +377,13 @@ const SalesTransactions = () => {
                   d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No transactions</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                {t('sales_transactions.no_transactions.title')}
+              </h3>
               <p className="mt-1 text-sm text-gray-500">
                 {allTransactions.length === 0
-                  ? "You haven't made any transactions yet."
-                  : "No transactions match your selected date range."}
+                  ? t('sales_transactions.no_transactions.description')
+                  : t('sales_transactions.no_transactions.filtered_description')}
               </p>
             </div>
           ) : (
@@ -374,25 +393,25 @@ const SalesTransactions = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Product
+                      {t('sales_transactions.table.product')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Buyer
+                      {t('sales_transactions.table.buyer')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
+                      {t('sales_transactions.table.date')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Sale Price
+                      {t('sales_transactions.table.sale_price')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Profit
+                      {t('sales_transactions.table.profit')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
+                      {t('sales_transactions.table.type')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                      {t('sales_transactions.table.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -438,14 +457,16 @@ const SalesTransactions = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {transaction.type === 'trade' ? 'Trade' : 'Sale'}
+                          {transaction.type === 'trade' 
+                            ? t('sales_transactions.summary.trade') 
+                            : t('sales_transactions.summary.sale')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
                             onClick={() => handleViewSale(transaction)}
                             className="text-blue-600 hover:text-blue-900"
                           >
-                            View
+                            {t('sales_transactions.summary.view')}
                           </button>
                         </td>
                       </tr>
@@ -484,7 +505,11 @@ const SalesTransactions = () => {
                             <div>
                               <div className="text-sm font-medium text-gray-900 line-clamp-1">{transaction.product.title}</div>
                               <div className="text-xs text-gray-500">{formatDate(transaction.created_at)}</div>
-                              <div className="text-xs text-gray-500">{transaction.type === 'trade' ? 'Trade' : 'Sale'}</div>
+                              <div className="text-xs text-gray-500">
+                                {transaction.type === 'trade' 
+                                  ? t('sales_transactions.summary.trade') 
+                                  : t('sales_transactions.summary.sale')}
+                              </div>
                             </div>
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isProfit ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                               {isProfit ? '+' : ''}{profit.toFixed(2)} MAD
@@ -514,11 +539,15 @@ const SalesTransactions = () => {
               <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    {selectedSale.isTrade ? 'Trade Details' : 'Sale Details'}
+                    {selectedSale.isTrade 
+                      ? t('sales_transactions.details.title.trade') 
+                      : t('sales_transactions.details.title.sale')}
                   </h3>
                   <div className="grid grid-cols-1 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Product</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {t('sales_transactions.details.product')}
+                      </label>
                       <div className="mt-1 flex items-center">
                         <img
                           className="h-16 w-16 rounded-md object-cover mr-4"
@@ -530,14 +559,18 @@ const SalesTransactions = () => {
                         />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{selectedSale.product.title}</p>
-                          <p className="text-sm text-gray-500">Original Price: {selectedSale.product.price.toFixed(2)} MAD</p>
+                          <p className="text-sm text-gray-500">
+                            {t('sales_transactions.details.original_price')}: {selectedSale.product.price.toFixed(2)} MAD
+                          </p>
                         </div>
                       </div>
                     </div>
                     
                     {selectedSale.isTrade && selectedSale.trade_details && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Traded Product</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                          {t('sales_transactions.details.traded_product')}
+                        </label>
                         <div className="mt-1 flex items-center">
                           {selectedSale.trade_details.old_product ? (
                             <>
@@ -551,7 +584,9 @@ const SalesTransactions = () => {
                               />
                               <div>
                                 <p className="text-sm font-medium text-gray-900">{selectedSale.trade_details.old_product.title}</p>
-                                <p className="text-sm text-gray-500">Buyback Price: {selectedSale.trade_details.buyback_price.toFixed(2)} MAD</p>
+                                <p className="text-sm text-gray-500">
+                                  {t('sales_transactions.details.buyback_price')}: {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
+                                </p>
                               </div>
                             </>
                           ) : (
@@ -562,28 +597,40 @@ const SalesTransactions = () => {
                     )}
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Buyer Information</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {t('sales_transactions.details.buyer_info')}
+                      </label>
                       <div className="mt-1 grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm text-gray-500">Name</p>
+                          <p className="text-sm text-gray-500">
+                            {t('sales_transactions.details.name')}
+                          </p>
                           <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_name}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Phone</p>
+                          <p className="text-sm text-gray-500">
+                            {t('sales_transactions.details.phone')}
+                          </p>
                           <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_phone}</p>
                         </div>
                       </div>
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Transaction Details</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {t('sales_transactions.details.transaction_details')}
+                      </label>
                       <div className="mt-1 grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm text-gray-500">Sale Price</p>
+                          <p className="text-sm text-gray-500">
+                            {t('sales_transactions.details.sale_price')}
+                          </p>
                           <p className="text-sm font-medium text-gray-900">{selectedSale.sell_price.toFixed(2)} MAD</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Profit</p>
+                          <p className="text-sm text-gray-500">
+                            {t('sales_transactions.details.profit')}
+                          </p>
                           <p className={`text-sm font-medium ${selectedSale.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {selectedSale.profit >= 0 ? '+' : ''}{selectedSale.profit.toFixed(2)} MAD
                           </p>
@@ -591,13 +638,17 @@ const SalesTransactions = () => {
                         {selectedSale.isTrade && selectedSale.trade_details && (
                           <>
                             <div>
-                              <p className="text-sm text-gray-500">User Paid</p>
+                              <p className="text-sm text-gray-500">
+                                {t('sales_transactions.details.user_paid')}
+                              </p>
                               <p className="text-sm font-medium text-gray-900">
                                 {selectedSale.trade_details.user_paid.toFixed(2)} MAD
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">Trade Value</p>
+                              <p className="text-sm text-gray-500">
+                                {t('sales_transactions.details.trade_value')}
+                              </p>
                               <p className="text-sm font-medium text-gray-900">
                                 {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
                               </p>
@@ -605,11 +656,15 @@ const SalesTransactions = () => {
                           </>
                         )}
                         <div>
-                          <p className="text-sm text-gray-500">Date</p>
+                          <p className="text-sm text-gray-500">
+                            {t('sales_transactions.details.date')}
+                          </p>
                           <p className="text-sm font-medium text-gray-900">{formatDateTime(selectedSale.created_at)}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Transaction ID</p>
+                          <p className="text-sm text-gray-500">
+                            {t('sales_transactions.details.transaction_id')}
+                          </p>
                           <p className="text-sm font-medium text-gray-900 truncate">{selectedSale.id}</p>
                         </div>
                       </div>
@@ -622,7 +677,7 @@ const SalesTransactions = () => {
                     className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                     onClick={closeModal}
                   >
-                    Close
+                    {t('sales_transactions.details.close')}
                   </button>
                 </div>
               </div>
@@ -642,7 +697,9 @@ const SalesTransactions = () => {
                     <div className="flex-1 py-6 overflow-y-auto px-4 sm:px-6">
                       <div className="flex items-start justify-between">
                         <h2 className="text-lg font-medium text-gray-900">
-                          {selectedSale.isTrade ? 'Trade Details' : 'Sale Details'}
+                          {selectedSale.isTrade 
+                            ? t('sales_transactions.details.title.trade') 
+                            : t('sales_transactions.details.title.sale')}
                         </h2>
                         <button
                           type="button"
@@ -660,7 +717,9 @@ const SalesTransactions = () => {
                         <div className="flow-root">
                           <div className="space-y-6">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Product</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                {t('sales_transactions.details.product')}
+                              </label>
                               <div className="flex items-center">
                                 <img
                                   className="h-20 w-20 rounded-md object-cover mr-4"
@@ -672,14 +731,18 @@ const SalesTransactions = () => {
                                 />
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">{selectedSale.product.title}</p>
-                                  <p className="text-sm text-gray-500">Original Price: {selectedSale.product.price.toFixed(2)} MAD</p>
+                                  <p className="text-sm text-gray-500">
+                                    {t('sales_transactions.details.original_price')}: {selectedSale.product.price.toFixed(2)} MAD
+                                  </p>
                                 </div>
                               </div>
                             </div>
 
                             {selectedSale.isTrade && selectedSale.trade_details && (
                               <div className="border-t border-gray-200 pt-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Traded Product</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                  {t('sales_transactions.details.traded_product')}
+                                </label>
                                 <div className="flex items-center">
                                   {selectedSale.trade_details.old_product ? (
                                     <>
@@ -693,7 +756,9 @@ const SalesTransactions = () => {
                                       />
                                       <div>
                                         <p className="text-sm font-medium text-gray-900">{selectedSale.trade_details.old_product.title}</p>
-                                        <p className="text-sm text-gray-500">Buyback Price: {selectedSale.trade_details.buyback_price.toFixed(2)} MAD</p>
+                                        <p className="text-sm text-gray-500">
+                                          {t('sales_transactions.details.buyback_price')}: {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
+                                        </p>
                                       </div>
                                     </>
                                   ) : (
@@ -704,28 +769,40 @@ const SalesTransactions = () => {
                             )}
 
                             <div className="border-t border-gray-200 pt-4">
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Buyer Information</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                {t('sales_transactions.details.buyer_info')}
+                              </label>
                               <div className="space-y-2">
                                 <div>
-                                  <p className="text-xs text-gray-500">Name</p>
+                                  <p className="text-xs text-gray-500">
+                                    {t('sales_transactions.details.name')}
+                                  </p>
                                   <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_name}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs text-gray-500">Phone</p>
+                                  <p className="text-xs text-gray-500">
+                                    {t('sales_transactions.details.phone')}
+                                  </p>
                                   <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_phone}</p>
                                 </div>
                               </div>
                             </div>
 
                             <div className="border-t border-gray-200 pt-4">
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Transaction Details</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                {t('sales_transactions.details.transaction_details')}
+                              </label>
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <p className="text-xs text-gray-500">Sale Price</p>
+                                  <p className="text-xs text-gray-500">
+                                    {t('sales_transactions.details.sale_price')}
+                                  </p>
                                   <p className="text-sm font-medium text-gray-900">{selectedSale.sell_price.toFixed(2)} MAD</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs text-gray-500">Profit</p>
+                                  <p className="text-xs text-gray-500">
+                                    {t('sales_transactions.details.profit')}
+                                  </p>
                                   <p className={`text-sm font-medium ${selectedSale.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     {selectedSale.profit >= 0 ? '+' : ''}{selectedSale.profit.toFixed(2)} MAD
                                   </p>
@@ -733,13 +810,17 @@ const SalesTransactions = () => {
                                 {selectedSale.isTrade && selectedSale.trade_details && (
                                   <>
                                     <div>
-                                      <p className="text-xs text-gray-500">User Paid</p>
+                                      <p className="text-xs text-gray-500">
+                                        {t('sales_transactions.details.user_paid')}
+                                      </p>
                                       <p className="text-sm font-medium text-gray-900">
                                         {selectedSale.trade_details.user_paid.toFixed(2)} MAD
                                       </p>
                                     </div>
                                     <div>
-                                      <p className="text-xs text-gray-500">Trade Value</p>
+                                      <p className="text-xs text-gray-500">
+                                        {t('sales_transactions.details.trade_value')}
+                                      </p>
                                       <p className="text-sm font-medium text-gray-900">
                                         {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
                                       </p>
@@ -747,11 +828,15 @@ const SalesTransactions = () => {
                                   </>
                                 )}
                                 <div>
-                                  <p className="text-xs text-gray-500">Date</p>
+                                  <p className="text-xs text-gray-500">
+                                    {t('sales_transactions.details.date')}
+                                  </p>
                                   <p className="text-sm font-medium text-gray-900">{formatDateTime(selectedSale.created_at)}</p>
                                 </div>
                                 <div>
-                                  <p className="text-xs text-gray-500">Transaction ID</p>
+                                  <p className="text-xs text-gray-500">
+                                    {t('sales_transactions.details.transaction_id')}
+                                  </p>
                                   <p className="text-sm font-medium text-gray-900 truncate">{selectedSale.id}</p>
                                 </div>
                               </div>
@@ -766,7 +851,7 @@ const SalesTransactions = () => {
                         onClick={closeModal}
                         className="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700"
                       >
-                        Close
+                        {t('sales_transactions.details.close')}
                       </button>
                     </div>
                   </div>

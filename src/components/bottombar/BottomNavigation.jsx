@@ -72,6 +72,19 @@ const BottomNavigation = ({ activeItem }) => {
           <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
           
           <div className="space-y-4">
+          <button
+              onClick={() => handleNavigation('/external trade')}
+              className="w-full flex items-center gap-4 p-4 bg-red-50 hover:bg-red-100 rounded-2xl transition-colors duration-200"
+            >
+              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+                <DollarSign size={24} className="text-white" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-800">{t('labels.tradeProductExternal')}</h3>
+                <p className="text-sm text-gray-600">{t('labels.tradeProductDescription')}</p>
+              </div>
+            </button>
+
             <button
               onClick={() => handleNavigation('/trade')}
               className="w-full flex items-center gap-4 p-4 bg-green-50 hover:bg-green-100 rounded-2xl transition-colors duration-200"
@@ -80,7 +93,7 @@ const BottomNavigation = ({ activeItem }) => {
                 <DollarSign size={24} className="text-white" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-gray-800">{t('labels.tradeProduct')}</h3>
+                <h3 className="font-semibold text-gray-800">{t('labels.tradeProductInternal')}</h3>
                 <p className="text-sm text-gray-600">{t('labels.tradeProductDescription')}</p>
               </div>
             </button>

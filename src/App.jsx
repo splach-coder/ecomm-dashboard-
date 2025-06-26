@@ -13,6 +13,7 @@ import ProductManagement from "./pages/Products";
 import AdminProductDetail from "./pages/Product";
 import SalesTransactions from "./pages/SalesTransactions";
 import TradeFlow from "./pages/TradeFlow";
+import ExternalTradeFlow from "./pages/ExternalTradeFlow";
 import Home from "./pages/Home";
 import ResetPassword from "./pages/ResetPassword";
 import i18n from "./i18n";
@@ -101,6 +102,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <TradeFlow />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/external trade"
+        element={
+          <ProtectedRoute>
+            <ExternalTradeFlow />
           </ProtectedRoute>
         }
       />
