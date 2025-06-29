@@ -23,56 +23,68 @@ const SalesTransactions = () => {
   const handleItemClick = (item) => setActiveItem(item);
   const handleLogout = () => signOut();
 
-  // Format date for display
+  // Safe format date functions
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    try {
+      const date = dateString ? new Date(dateString) : new Date();
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return 'Invalid Date';
+    }
   };
 
   const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    try {
+      const date = dateString ? new Date(dateString) : new Date();
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return 'Invalid Date';
+    }
   };
 
   useEffect(() => {
     async function loadTransactions() {
       setIsLoading(true);
+      setError(null);
       try {
         const [salesData, tradesData] = await Promise.all([
           fetchSalesWithProduct(),
           fetchTradesWithProducts()
         ]);
         
-        setSales(salesData);
+        // Ensure salesData is an array
+        const safeSales = Array.isArray(salesData) ? salesData : [];
+        setSales(safeSales);
         
         // Transform trades to match sales format for display
-        const formattedTrades = tradesData.map(trade => ({
-          id: trade.id,
+        const safeTrades = Array.isArray(tradesData) ? tradesData : [];
+        const formattedTrades = safeTrades.map(trade => ({
+          id: trade?.id || 'N/A',
           type: 'trade',
-          product_id: trade.new_product_id,
-          product: trade.new_product,
-          sell_price: trade.new_product_price,
-          original_price: trade.new_product.price,
-          profit: trade.profit,
-          buyer_name: trade.buyer_name || 'Trade Customer',
-          buyer_phone: trade.buyer_phone || 'N/A',
-          created_at: trade.created_at,
-          trade_details: trade
+          product_id: trade?.new_product_id || 'N/A',
+          product: trade?.new_product || { title: 'Unknown Product', price: 0, images: [], sku: 'N/A' },
+          sell_price: trade?.new_product_price || 0,
+          original_price: trade?.new_product?.price || 0,
+          profit: trade?.profit || 0,
+          buyer_name: trade?.buyer_name || 'Trade Customer',
+          buyer_phone: trade?.buyer_phone || 'N/A',
+          created_at: trade?.created_at || new Date().toISOString(),
+          trade_details: trade || {}
         }));
         
         setTrades(formattedTrades);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'Failed to load transactions');
       } finally {
         setIsLoading(false);
       }
@@ -81,40 +93,61 @@ const SalesTransactions = () => {
     loadTransactions();
   }, []);
 
-  // Combine sales and trades for display
+  // Combine sales and trades for display with safe defaults
   const allTransactions = useMemo(() => {
-    return [...sales, ...trades].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const safeSales = Array.isArray(sales) ? sales : [];
+    const safeTrades = Array.isArray(trades) ? trades : [];
+    
+    return [...safeSales, ...safeTrades]
+      .map(t => ({
+        ...t,
+        product: t.product || { title: 'Unknown Product', price: 0, images: [], sku: 'N/A' },
+        sell_price: t.sell_price || 0,
+        created_at: t.created_at || new Date().toISOString()
+      }))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, [sales, trades]);
 
-  // Filter transactions based on date range
+  // Filter transactions based on date range with safe checks
   const filteredTransactions = useMemo(() => {
-    if (!startDate && !endDate) return allTransactions;
+    if (!Array.isArray(allTransactions)) return [];
     
     return allTransactions.filter(transaction => {
-      const transactionDate = new Date(transaction.created_at);
-      const start = startDate ? new Date(startDate) : null;
-      const end = endDate ? new Date(endDate) : null;
-      
-      if (start && end) {
-        return transactionDate >= start && transactionDate <= end;
-      } else if (start) {
-        return transactionDate >= start;
-      } else if (end) {
-        return transactionDate <= end;
+      try {
+        const transactionDate = new Date(transaction.created_at);
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
+        
+        if (start && end) {
+          return transactionDate >= start && transactionDate <= end;
+        } else if (start) {
+          return transactionDate >= start;
+        } else if (end) {
+          return transactionDate <= end;
+        }
+        return true;
+      } catch {
+        return false;
       }
-      return true;
     });
   }, [allTransactions, startDate, endDate]);
 
-  // Calculate totals
+  // Calculate totals with safe defaults
   const totals = useMemo(() => {
+    if (!Array.isArray(filteredTransactions)) {
+      return { totalSales: 0, totalProfit: 0, count: 0 };
+    }
+    
     return filteredTransactions.reduce((acc, transaction) => {
+      const productPrice = transaction.product?.price || 0;
+      const sellPrice = transaction.sell_price || 0;
+      
       const profit = transaction.type === 'trade' 
-        ? transaction.profit 
-        : transaction.sell_price - transaction.product.price;
+        ? transaction.profit || 0
+        : sellPrice - productPrice;
       
       return {
-        totalSales: acc.totalSales + transaction.sell_price,
+        totalSales: acc.totalSales + sellPrice,
         totalProfit: acc.totalProfit + profit,
         count: acc.count + 1
       };
@@ -122,14 +155,21 @@ const SalesTransactions = () => {
   }, [filteredTransactions]);
 
   const handleViewSale = (transaction) => {
+    if (!transaction) return;
+    
+    const productPrice = transaction.product?.price || 0;
+    const sellPrice = transaction.sell_price || 0;
+    
     const profit = transaction.type === 'trade' 
-      ? transaction.profit 
-      : transaction.sell_price - transaction.product.price;
+      ? transaction.profit || 0
+      : sellPrice - productPrice;
     
     setSelectedSale({
       ...transaction,
+      product: transaction.product || { title: 'Unknown Product', price: 0, images: [], sku: 'N/A' },
       profit: profit,
-      isTrade: transaction.type === 'trade'
+      isTrade: transaction.type === 'trade',
+      trade_details: transaction.trade_details || {}
     });
     setShowModal(true);
   };
@@ -137,6 +177,18 @@ const SalesTransactions = () => {
   const closeModal = () => {
     setShowModal(false);
     setSelectedSale(null);
+  };
+
+  // Transaction type tag component
+  const TransactionTypeTag = ({ type }) => {
+    const isTrade = type === 'trade';
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+        isTrade ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+      }`}>
+        {isTrade ? t('sales_transactions.summary.trade') : t('sales_transactions.summary.sale')}
+      </span>
+    );
   };
 
   // Loading state
@@ -417,9 +469,13 @@ const SalesTransactions = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredTransactions.map((transaction) => {
+                    const product = transaction.product || {};
+                    const productPrice = product.price || 0;
+                    const sellPrice = transaction.sell_price || 0;
+                    
                     const profit = transaction.type === 'trade' 
-                      ? transaction.profit 
-                      : transaction.sell_price - transaction.product.price;
+                      ? transaction.profit || 0
+                      : sellPrice - productPrice;
                     const isProfit = profit >= 0;
 
                     return (
@@ -429,37 +485,35 @@ const SalesTransactions = () => {
                             <div className="flex-shrink-0 h-10 w-10">
                               <img
                                 className="h-10 w-10 rounded-md object-cover"
-                                src={`${transaction.product.images[0]}`}
-                                alt={transaction.product.title}
+                                src={product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
+                                alt={product.title}
                                 onError={(e) => {
                                   e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
                                 }}
                               />
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{transaction.product.title}</div>
-                              <div className="text-sm text-gray-500">SKU: {transaction.product.sku || 'N/A'}</div>
+                              <div className="text-sm font-medium text-gray-900">{product.title || 'Unknown Product'}</div>
+                              <div className="text-sm text-gray-500">SKU: {product.sku || 'N/A'}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {transaction.buyer_name}
+                          {transaction.buyer_name || 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {formatDate(transaction.created_at)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {transaction.sell_price.toFixed(2)} MAD
+                          {sellPrice.toFixed(2)} MAD
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isProfit ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                             {isProfit ? '+' : ''}{profit.toFixed(2)} MAD
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {transaction.type === 'trade' 
-                            ? t('sales_transactions.summary.trade') 
-                            : t('sales_transactions.summary.sale')}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <TransactionTypeTag type={transaction.type} />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
@@ -478,9 +532,13 @@ const SalesTransactions = () => {
               {/* Mobile List */}
               <div className="lg:hidden divide-y divide-gray-200">
                 {filteredTransactions.map((transaction) => {
+                  const product = transaction.product || {};
+                  const productPrice = product.price || 0;
+                  const sellPrice = transaction.sell_price || 0;
+                  
                   const profit = transaction.type === 'trade' 
-                    ? transaction.profit 
-                    : transaction.sell_price - transaction.product.price;
+                    ? transaction.profit || 0
+                    : sellPrice - productPrice;
                   const isProfit = profit >= 0;
 
                   return (
@@ -493,8 +551,8 @@ const SalesTransactions = () => {
                         <div className="flex-shrink-0 h-16 w-16">
                           <img
                             className="h-16 w-16 rounded-md object-cover"
-                            src={`${transaction.product.images[0]}`}
-                            alt={transaction.product.title}
+                            src={product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
+                            alt={product.title}
                             onError={(e) => {
                               e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
                             }}
@@ -503,12 +561,12 @@ const SalesTransactions = () => {
                         <div className="ml-4 flex-1">
                           <div className="flex justify-between">
                             <div>
-                              <div className="text-sm font-medium text-gray-900 line-clamp-1">{transaction.product.title}</div>
+                              <div className="text-sm font-medium text-gray-900 line-clamp-1">
+                                {product.title || 'Unknown Product'}
+                              </div>
                               <div className="text-xs text-gray-500">{formatDate(transaction.created_at)}</div>
-                              <div className="text-xs text-gray-500">
-                                {transaction.type === 'trade' 
-                                  ? t('sales_transactions.summary.trade') 
-                                  : t('sales_transactions.summary.sale')}
+                              <div className="mt-1">
+                                <TransactionTypeTag type={transaction.type} />
                               </div>
                             </div>
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isProfit ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -526,7 +584,7 @@ const SalesTransactions = () => {
         </div>
       </div>
 
-      {/* Modal for desktop view */}
+      {/* Modal for transaction details */}
       {selectedSale && (
         <>
           {/* Desktop Modal */}
@@ -551,16 +609,16 @@ const SalesTransactions = () => {
                       <div className="mt-1 flex items-center">
                         <img
                           className="h-16 w-16 rounded-md object-cover mr-4"
-                          src={`${selectedSale.product.images[0]}`}
+                          src={selectedSale.product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
                           alt={selectedSale.product.title}
                           onError={(e) => {
                             e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
                           }}
                         />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{selectedSale.product.title}</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedSale.product.title || 'Unknown Product'}</p>
                           <p className="text-sm text-gray-500">
-                            {t('sales_transactions.details.original_price')}: {selectedSale.product.price.toFixed(2)} MAD
+                            {t('sales_transactions.details.original_price')}: {selectedSale.product.price?.toFixed(2) || '0.00'} MAD
                           </p>
                         </div>
                       </div>
@@ -576,16 +634,18 @@ const SalesTransactions = () => {
                             <>
                               <img
                                 className="h-16 w-16 rounded-md object-cover mr-4"
-                                src={`${selectedSale.trade_details.old_product.images[0]}`}
+                                src={selectedSale.trade_details.old_product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
                                 alt={selectedSale.trade_details.old_product.title}
                                 onError={(e) => {
                                   e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
                                 }}
                               />
                               <div>
-                                <p className="text-sm font-medium text-gray-900">{selectedSale.trade_details.old_product.title}</p>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {selectedSale.trade_details.old_product.title || 'Unknown Product'}
+                                </p>
                                 <p className="text-sm text-gray-500">
-                                  {t('sales_transactions.details.buyback_price')}: {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
+                                  {t('sales_transactions.details.buyback_price')}: {selectedSale.trade_details.buyback_price?.toFixed(2) || '0.00'} MAD
                                 </p>
                               </div>
                             </>
@@ -605,13 +665,13 @@ const SalesTransactions = () => {
                           <p className="text-sm text-gray-500">
                             {t('sales_transactions.details.name')}
                           </p>
-                          <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_name}</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_name || 'N/A'}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">
                             {t('sales_transactions.details.phone')}
                           </p>
-                          <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_phone}</p>
+                          <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_phone || 'N/A'}</p>
                         </div>
                       </div>
                     </div>
@@ -625,14 +685,16 @@ const SalesTransactions = () => {
                           <p className="text-sm text-gray-500">
                             {t('sales_transactions.details.sale_price')}
                           </p>
-                          <p className="text-sm font-medium text-gray-900">{selectedSale.sell_price.toFixed(2)} MAD</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {selectedSale.sell_price?.toFixed(2) || '0.00'} MAD
+                          </p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">
                             {t('sales_transactions.details.profit')}
                           </p>
                           <p className={`text-sm font-medium ${selectedSale.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {selectedSale.profit >= 0 ? '+' : ''}{selectedSale.profit.toFixed(2)} MAD
+                            {selectedSale.profit >= 0 ? '+' : ''}{selectedSale.profit?.toFixed(2) || '0.00'} MAD
                           </p>
                         </div>
                         {selectedSale.isTrade && selectedSale.trade_details && (
@@ -642,7 +704,7 @@ const SalesTransactions = () => {
                                 {t('sales_transactions.details.user_paid')}
                               </p>
                               <p className="text-sm font-medium text-gray-900">
-                                {selectedSale.trade_details.user_paid.toFixed(2)} MAD
+                                {selectedSale.trade_details.user_paid?.toFixed(2) || '0.00'} MAD
                               </p>
                             </div>
                             <div>
@@ -650,7 +712,7 @@ const SalesTransactions = () => {
                                 {t('sales_transactions.details.trade_value')}
                               </p>
                               <p className="text-sm font-medium text-gray-900">
-                                {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
+                                {selectedSale.trade_details.buyback_price?.toFixed(2) || '0.00'} MAD
                               </p>
                             </div>
                           </>
@@ -659,13 +721,17 @@ const SalesTransactions = () => {
                           <p className="text-sm text-gray-500">
                             {t('sales_transactions.details.date')}
                           </p>
-                          <p className="text-sm font-medium text-gray-900">{formatDateTime(selectedSale.created_at)}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {formatDateTime(selectedSale.created_at)}
+                          </p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">
                             {t('sales_transactions.details.transaction_id')}
                           </p>
-                          <p className="text-sm font-medium text-gray-900 truncate">{selectedSale.id}</p>
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {selectedSale.id || 'N/A'}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -723,16 +789,18 @@ const SalesTransactions = () => {
                               <div className="flex items-center">
                                 <img
                                   className="h-20 w-20 rounded-md object-cover mr-4"
-                                  src={`${selectedSale.product.images[0]}`}
+                                  src={selectedSale.product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
                                   alt={selectedSale.product.title}
                                   onError={(e) => {
                                     e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
                                   }}
                                 />
                                 <div>
-                                  <p className="text-sm font-medium text-gray-900">{selectedSale.product.title}</p>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {selectedSale.product.title || 'Unknown Product'}
+                                  </p>
                                   <p className="text-sm text-gray-500">
-                                    {t('sales_transactions.details.original_price')}: {selectedSale.product.price.toFixed(2)} MAD
+                                    {t('sales_transactions.details.original_price')}: {selectedSale.product.price?.toFixed(2) || '0.00'} MAD
                                   </p>
                                 </div>
                               </div>
@@ -748,16 +816,18 @@ const SalesTransactions = () => {
                                     <>
                                       <img
                                         className="h-20 w-20 rounded-md object-cover mr-4"
-                                        src={`${selectedSale.trade_details.old_product.images[0]}`}
+                                        src={selectedSale.trade_details.old_product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'}
                                         alt={selectedSale.trade_details.old_product.title}
                                         onError={(e) => {
                                           e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
                                         }}
                                       />
                                       <div>
-                                        <p className="text-sm font-medium text-gray-900">{selectedSale.trade_details.old_product.title}</p>
+                                        <p className="text-sm font-medium text-gray-900">
+                                          {selectedSale.trade_details.old_product.title || 'Unknown Product'}
+                                        </p>
                                         <p className="text-sm text-gray-500">
-                                          {t('sales_transactions.details.buyback_price')}: {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
+                                          {t('sales_transactions.details.buyback_price')}: {selectedSale.trade_details.buyback_price?.toFixed(2) || '0.00'} MAD
                                         </p>
                                       </div>
                                     </>
@@ -777,13 +847,17 @@ const SalesTransactions = () => {
                                   <p className="text-xs text-gray-500">
                                     {t('sales_transactions.details.name')}
                                   </p>
-                                  <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_name}</p>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {selectedSale.buyer_name || 'N/A'}
+                                  </p>
                                 </div>
                                 <div>
                                   <p className="text-xs text-gray-500">
                                     {t('sales_transactions.details.phone')}
                                   </p>
-                                  <p className="text-sm font-medium text-gray-900">{selectedSale.buyer_phone}</p>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {selectedSale.buyer_phone || 'N/A'}
+                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -797,14 +871,16 @@ const SalesTransactions = () => {
                                   <p className="text-xs text-gray-500">
                                     {t('sales_transactions.details.sale_price')}
                                   </p>
-                                  <p className="text-sm font-medium text-gray-900">{selectedSale.sell_price.toFixed(2)} MAD</p>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {selectedSale.sell_price?.toFixed(2) || '0.00'} MAD
+                                  </p>
                                 </div>
                                 <div>
                                   <p className="text-xs text-gray-500">
                                     {t('sales_transactions.details.profit')}
                                   </p>
                                   <p className={`text-sm font-medium ${selectedSale.profit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                    {selectedSale.profit >= 0 ? '+' : ''}{selectedSale.profit.toFixed(2)} MAD
+                                    {selectedSale.profit >= 0 ? '+' : ''}{selectedSale.profit?.toFixed(2) || '0.00'} MAD
                                   </p>
                                 </div>
                                 {selectedSale.isTrade && selectedSale.trade_details && (
@@ -814,7 +890,7 @@ const SalesTransactions = () => {
                                         {t('sales_transactions.details.user_paid')}
                                       </p>
                                       <p className="text-sm font-medium text-gray-900">
-                                        {selectedSale.trade_details.user_paid.toFixed(2)} MAD
+                                        {selectedSale.trade_details.user_paid?.toFixed(2) || '0.00'} MAD
                                       </p>
                                     </div>
                                     <div>
@@ -822,7 +898,7 @@ const SalesTransactions = () => {
                                         {t('sales_transactions.details.trade_value')}
                                       </p>
                                       <p className="text-sm font-medium text-gray-900">
-                                        {selectedSale.trade_details.buyback_price.toFixed(2)} MAD
+                                        {selectedSale.trade_details.buyback_price?.toFixed(2) || '0.00'} MAD
                                       </p>
                                     </div>
                                   </>
@@ -831,13 +907,17 @@ const SalesTransactions = () => {
                                   <p className="text-xs text-gray-500">
                                     {t('sales_transactions.details.date')}
                                   </p>
-                                  <p className="text-sm font-medium text-gray-900">{formatDateTime(selectedSale.created_at)}</p>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {formatDateTime(selectedSale.created_at)}
+                                  </p>
                                 </div>
                                 <div>
                                   <p className="text-xs text-gray-500">
                                     {t('sales_transactions.details.transaction_id')}
                                   </p>
-                                  <p className="text-sm font-medium text-gray-900 truncate">{selectedSale.id}</p>
+                                  <p className="text-sm font-medium text-gray-900 truncate">
+                                    {selectedSale.id || 'N/A'}
+                                  </p>
                                 </div>
                               </div>
                             </div>

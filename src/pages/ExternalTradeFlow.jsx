@@ -30,15 +30,16 @@ export default function ExternalTradeFlow() {
       .from("products")
       .select("*")
       .eq("imei", oldImei)
-      .eq("in_stock", 1)
       .single();
 
     if (error || !data) {
       setOldProduct(null);
       return toast.error(t("external_trade_flow.toasts.old_product_not_found"));
+    } else {
+      setOldProduct(data);
+      setBuybackPrice(data.price.toString()); // Auto-fill with product price from database
+      toast.success(t("external_trade_flow.toasts.old_product_found"));
     }
-    setOldProduct(data);
-    toast.success(t("external_trade_flow.toasts.old_product_found"));
   };
 
   const loadNewProduct = async () => {
@@ -83,11 +84,11 @@ export default function ExternalTradeFlow() {
       internal: false // This is an external trade
     });
 
-    // For external trades, both products are from inventory
-    // Old product gets removed from stock (we're buying it from customer)
-    const decOld = supabase
+    // For external trades:
+    // Old product stock increases (we're receiving the device from customer)
+    const incOld = supabase
       .from("products")
-      .update({ in_stock: oldProduct.in_stock - 1 })
+      .update({ in_stock: oldProduct.in_stock})
       .eq("id", oldProduct.id);
 
     // New product gets removed from stock (customer is buying it)
@@ -96,7 +97,7 @@ export default function ExternalTradeFlow() {
       .update({ in_stock: newProduct.in_stock - 1 })
       .eq("id", newProduct.id);
 
-    const [r1, r2, r3] = await Promise.all([trade, decOld, decNew]);
+    const [r1, r2, r3] = await Promise.all([trade, incOld, decNew]);
     setSubmitting(false);
 
     if (r1.error || r2.error || r3.error) {
