@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
-import { fetchSalesWithProduct, fetchTradesWithProducts } from "../features/updateProductStock";
+import { fetchSalesWithProduct, fetchTradesWithProducts, updateSellPaymentStatus } from "../features/updateProductStock";
 import { useAuth } from '../features/auth/AuthContext';
 import Sidebar from '../components/sidebar/Sidebar';
 import BottomNavigation from '../components/bottombar/BottomNavigation';
@@ -18,6 +18,9 @@ const SalesTransactions = () => {
   const [activeItem, setActiveItem] = useState('sales');
   const [selectedSale, setSelectedSale] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [updatingPaymentId, setUpdatingPaymentId] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('pending'); // 'pending', 'paid', 'all'
 
   const handleToggle = () => setIsOpen(!isOpen);
   const handleItemClick = (item) => setActiveItem(item);
@@ -93,11 +96,30 @@ const SalesTransactions = () => {
     loadTransactions();
   }, []);
 
-  // Combine sales and trades for display with safe defaults
+  // Filter sales by search query (case-insensitive, name or phone)
+  const filteredSales = useMemo(() => {
+    let filtered = sales;
+    // Status filter
+    if (statusFilter === 'pending') {
+      filtered = filtered.filter(sale => !sale.is_fully_paid);
+    } else if (statusFilter === 'paid') {
+      filtered = filtered.filter(sale => sale.is_fully_paid);
+    }
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(sale =>
+        (sale.buyer_name && sale.buyer_name.toLowerCase().includes(query)) ||
+        (sale.buyer_phone && sale.buyer_phone.toLowerCase().includes(query))
+      );
+    }
+    return filtered;
+  }, [sales, searchQuery, statusFilter]);
+
+  // Combine filtered sales and all trades for display
   const allTransactions = useMemo(() => {
-    const safeSales = Array.isArray(sales) ? sales : [];
+    const safeSales = Array.isArray(filteredSales) ? filteredSales : [];
     const safeTrades = Array.isArray(trades) ? trades : [];
-    
     return [...safeSales, ...safeTrades]
       .map(t => ({
         ...t,
@@ -106,7 +128,7 @@ const SalesTransactions = () => {
         created_at: t.created_at || new Date().toISOString()
       }))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  }, [sales, trades]);
+  }, [filteredSales, trades]);
 
   // Filter transactions based on date range with safe checks
   const filteredTransactions = useMemo(() => {
@@ -177,6 +199,27 @@ const SalesTransactions = () => {
   const closeModal = () => {
     setShowModal(false);
     setSelectedSale(null);
+  };
+
+  // Payment status toggle handler
+  const handlePaymentToggle = async (transaction) => {
+    if (transaction.type === 'trade') return;
+    setUpdatingPaymentId(transaction.id);
+    try {
+      await updateSellPaymentStatus(
+        transaction.id,
+        !transaction.is_fully_paid,
+        transaction.paid_price,
+        transaction.sell_price
+      );
+      // Refetch sales data after update
+      const updatedSales = await fetchSalesWithProduct();
+      setSales(updatedSales);
+    } catch (err) {
+      alert('Failed to update payment status: ' + (err.message || err));
+    } finally {
+      setUpdatingPaymentId(null);
+    }
   };
 
   // Transaction type tag component
@@ -270,7 +313,6 @@ const SalesTransactions = () => {
             <h1 className="text-2xl font-bold text-oceanblue mb-4">
               {t('sales_transactions.title')}
             </h1>
-            
             {/* Date Range Filter */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
@@ -309,7 +351,29 @@ const SalesTransactions = () => {
                 </button>
               </div>
             </div>
-
+            {/* Status Filter */}
+            <div className="mb-4 flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-700">Status:</label>
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              >
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="all">All</option>
+              </select>
+            </div>
+            {/* Search Bar for Sells */}
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Search by buyer name or phone (sells only)"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
             {/* Results count */}
             <div className="text-sm text-gray-500">
               {t('sales_transactions.showing_results', {
@@ -396,7 +460,7 @@ const SalesTransactions = () => {
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
                     <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div className="ml-5 w-0 flex-1">
@@ -463,6 +527,9 @@ const SalesTransactions = () => {
                       {t('sales_transactions.table.type')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('sales_transactions.table.payment_status')}
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t('sales_transactions.table.actions')}
                     </th>
                   </tr>
@@ -514,6 +581,13 @@ const SalesTransactions = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <TransactionTypeTag type={transaction.type} />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {transaction.type !== 'trade' ? (
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.is_fully_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                              {transaction.is_fully_paid ? 'Paid' : 'Pending'}
+                            </span>
+                          ) : null}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
@@ -573,6 +647,12 @@ const SalesTransactions = () => {
                               {isProfit ? '+' : ''}{profit.toFixed(2)} MAD
                             </span>
                           </div>
+                          {/* Payment Status badge for sells only */}
+                          {transaction.type !== 'trade' && (
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${transaction.is_fully_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} mt-1`}>
+                              {transaction.is_fully_paid ? 'Paid' : 'Pending'}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -675,6 +755,57 @@ const SalesTransactions = () => {
                         </div>
                       </div>
                     </div>
+                    
+                    {!selectedSale.isTrade && (
+                      <div className="border-t border-gray-200 pt-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Payment Info</label>
+                        <div className="flex items-center gap-4 mb-2">
+                          <span className="text-sm text-gray-500">Paid Price:</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedSale.paid_price?.toFixed(2) || '0.00'} MAD</span>
+                        </div>
+                        <div className="flex items-center gap-4 mb-2">
+                          <span className="text-sm text-gray-500">Rest Price:</span>
+                          <span className="text-sm font-medium text-gray-900">{selectedSale.rest_price?.toFixed(2) || '0.00'} MAD</span>
+                        </div>
+                        <div className="flex items-center gap-4 mt-2">
+                          <label className="inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedSale.is_fully_paid}
+                              disabled={updatingPaymentId === selectedSale.id}
+                              onChange={async () => {
+                                setUpdatingPaymentId(selectedSale.id);
+                                try {
+                                  await updateSellPaymentStatus(
+                                    selectedSale.id,
+                                    !selectedSale.is_fully_paid,
+                                    selectedSale.paid_price,
+                                    selectedSale.sell_price
+                                  );
+                                  // Refetch sales data after update
+                                  const updatedSales = await fetchSalesWithProduct();
+                                  setSales(updatedSales);
+                                  // Update selectedSale in modal
+                                  const updated = updatedSales.find(s => s.id === selectedSale.id);
+                                  if (updated) setSelectedSale({ ...selectedSale, ...updated });
+                                } catch (err) {
+                                  alert('Failed to update payment status: ' + (err.message || err));
+                                } finally {
+                                  setUpdatingPaymentId(null);
+                                }
+                              }}
+                              className="form-checkbox h-5 w-5 text-green-600"
+                            />
+                            <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedSale.is_fully_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                              {selectedSale.is_fully_paid ? 'Paid' : 'Pending'}
+                            </span>
+                            {updatingPaymentId === selectedSale.id && (
+                              <svg className="ml-2 h-4 w-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="4" className="opacity-25"/><path d="M4 12a8 8 0 018-8" strokeWidth="4" className="opacity-75"/></svg>
+                            )}
+                          </label>
+                        </div>
+                      </div>
+                    )}
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
@@ -862,6 +993,57 @@ const SalesTransactions = () => {
                               </div>
                             </div>
 
+                            {!selectedSale.isTrade && (
+                              <div className="border-t border-gray-200 pt-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Info</label>
+                                <div className="flex items-center gap-4 mb-2">
+                                  <span className="text-sm text-gray-500">Paid Price:</span>
+                                  <span className="text-sm font-medium text-gray-900">{selectedSale.paid_price?.toFixed(2) || '0.00'} MAD</span>
+                                </div>
+                                <div className="flex items-center gap-4 mb-2">
+                                  <span className="text-sm text-gray-500">Rest Price:</span>
+                                  <span className="text-sm font-medium text-gray-900">{selectedSale.rest_price?.toFixed(2) || '0.00'} MAD</span>
+                                </div>
+                                <div className="flex items-center gap-4 mt-2">
+                                  <label className="inline-flex items-center cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedSale.is_fully_paid}
+                                      disabled={updatingPaymentId === selectedSale.id}
+                                      onChange={async () => {
+                                        setUpdatingPaymentId(selectedSale.id);
+                                        try {
+                                          await updateSellPaymentStatus(
+                                            selectedSale.id,
+                                            !selectedSale.is_fully_paid,
+                                            selectedSale.paid_price,
+                                            selectedSale.sell_price
+                                          );
+                                          // Refetch sales data after update
+                                          const updatedSales = await fetchSalesWithProduct();
+                                          setSales(updatedSales);
+                                          // Update selectedSale in modal
+                                          const updated = updatedSales.find(s => s.id === selectedSale.id);
+                                          if (updated) setSelectedSale({ ...selectedSale, ...updated });
+                                        } catch (err) {
+                                          alert('Failed to update payment status: ' + (err.message || err));
+                                        } finally {
+                                          setUpdatingPaymentId(null);
+                                        }
+                                      }}
+                                      className="form-checkbox h-5 w-5 text-green-600"
+                                    />
+                                    <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedSale.is_fully_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                      {selectedSale.is_fully_paid ? 'Paid' : 'Pending'}
+                                    </span>
+                                    {updatingPaymentId === selectedSale.id && (
+                                      <svg className="ml-2 h-4 w-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="4" className="opacity-25"/><path d="M4 12a8 8 0 018-8" strokeWidth="4" className="opacity-75"/></svg>
+                                    )}
+                                  </label>
+                                </div>
+                              </div>
+                            )}
+
                             <div className="border-t border-gray-200 pt-4">
                               <label className="block text-sm font-medium text-gray-700 mb-2">
                                 {t('sales_transactions.details.transaction_details')}
@@ -924,21 +1106,14 @@ const SalesTransactions = () => {
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="border-t border-gray-200 py-6 px-4 sm:px-6">
-                      <button
-                        onClick={closeModal}
-                        className="w-full flex justify-center items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700"
-                      >
-                        {t('sales_transactions.details.close')}
-                      </button>
-                    </div>
+                    
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
         </>
       )}
     </div>

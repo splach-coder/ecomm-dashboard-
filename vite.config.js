@@ -12,20 +12,20 @@ export default defineConfig({
         enabled: true
       },
       manifest: {
-        name: 'Files Explorer AI',
-        short_name: 'FilesAI',
+        name: 'Yassir Phones',
+        short_name: 'Yassir Phones',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#0f172a',
         icons: [
           {
-            src: 'icons/icon-192.png',
+            src: 'icons/favicon.svg',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'icons/icon-512.png',
+            src: 'icons/favicon.svg',
             sizes: '512x512',
             type: 'image/png'
           }

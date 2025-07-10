@@ -40,6 +40,9 @@ async function fetchSalesWithProduct() {
       buyer_phone,
       type,
       created_at,
+      paid_price,
+      rest_price,
+      is_fully_paid,
       product:products (
         id,
         title,
@@ -52,6 +55,24 @@ async function fetchSalesWithProduct() {
   if (error) throw error;
 
   return data;
+}
+
+// Update payment status for a sell
+async function updateSellPaymentStatus(sellId, isFullyPaid, paidPrice, sellPrice) {
+  let updateObj = { is_fully_paid: isFullyPaid };
+  if (isFullyPaid) {
+    updateObj.rest_price = 0;
+    updateObj.paid_price = sellPrice; // Mark as fully paid
+  } else {
+    // If unchecked, restore rest_price to original (sell_price - paid_price)
+    updateObj.rest_price = sellPrice - paidPrice;
+    updateObj.paid_price = paidPrice; // Keep paid_price as is
+  }
+  const { error } = await supabase
+    .from("sells")
+    .update(updateObj)
+    .eq("id", sellId);
+  if (error) throw error;
 }
 
 async function fetchTradesWithProducts() {
@@ -123,4 +144,4 @@ async function fetchTradesWithProducts() {
   }));
 }
 
-export {updateProductStock, fetchSalesWithProduct, fetchTradesWithProducts}
+export {updateProductStock, fetchSalesWithProduct, fetchTradesWithProducts, updateSellPaymentStatus}
