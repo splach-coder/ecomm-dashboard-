@@ -145,7 +145,7 @@ const SalesTransactions = () => {
         } else if (start) {
           return transactionDate >= start;
         } else if (end) {
-          return transactionDate <= end;
+          return transactionDate >= start && transactionDate <= end; // Adjusted to include transactions on the end date
         }
         return true;
       } catch {
@@ -313,8 +313,10 @@ const SalesTransactions = () => {
             <h1 className="text-2xl font-bold text-oceanblue mb-4">
               {t('sales_transactions.title')}
             </h1>
-            {/* Date Range Filter */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            
+            {/* Redesigned Filtering Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 items-end">
+              {/* Date Range Filter */}
               <div>
                 <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-1">
                   {t('sales_transactions.start_date')}
@@ -339,43 +341,62 @@ const SalesTransactions = () => {
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
-              <div className="flex items-end">
-                <button
-                  onClick={() => {
-                    setStartDate('');
-                    setEndDate('');
-                  }}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              
+              {/* Status Filter */}
+              <div>
+                <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('sales_transactions.status_filter')}
+                </label>
+                <select
+                  id="status-filter"
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 >
-                  {t('sales_transactions.clear_filters')}
-                </button>
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+
+              {/* Search Bar for Sells */}
+              <div className="relative">
+                <label htmlFor="search-query" className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('sales_transactions.search_label')}
+                </label>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none pb-1">
+                  <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <input
+                  id="search-query"
+                  type="text"
+                  placeholder={t('sales_transactions.search_placeholder')}
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
               </div>
             </div>
-            {/* Status Filter */}
-            <div className="mb-4 flex items-center gap-4">
-              <label className="text-sm font-medium text-gray-700">Status:</label>
-              <select
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            
+            {/* Clear Filters Button */}
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={() => {
+                  setStartDate('');
+                  setEndDate('');
+                  setSearchQuery('');
+                  setStatusFilter('pending');
+                }}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
-                <option value="all">All</option>
-              </select>
+                {t('sales_transactions.clear_filters')}
+              </button>
             </div>
-            {/* Search Bar for Sells */}
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Search by buyer name or phone (sells only)"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-            </div>
+
             {/* Results count */}
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 mt-2">
               {t('sales_transactions.showing_results', {
                 count: filteredTransactions.length,
                 total: allTransactions.length
@@ -758,7 +779,7 @@ const SalesTransactions = () => {
                     
                     {!selectedSale.isTrade && (
                       <div className="border-t border-gray-200 pt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Payment Info</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Payment Status</label>
                         <div className="flex items-center gap-4 mb-2">
                           <span className="text-sm text-gray-500">Paid Price:</span>
                           <span className="text-sm font-medium text-gray-900">{selectedSale.paid_price?.toFixed(2) || '0.00'} MAD</span>
@@ -767,42 +788,45 @@ const SalesTransactions = () => {
                           <span className="text-sm text-gray-500">Rest Price:</span>
                           <span className="text-sm font-medium text-gray-900">{selectedSale.rest_price?.toFixed(2) || '0.00'} MAD</span>
                         </div>
-                        <div className="flex items-center gap-4 mt-2">
-                          <label className="inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={selectedSale.is_fully_paid}
-                              disabled={updatingPaymentId === selectedSale.id}
-                              onChange={async () => {
-                                setUpdatingPaymentId(selectedSale.id);
-                                try {
-                                  await updateSellPaymentStatus(
-                                    selectedSale.id,
-                                    !selectedSale.is_fully_paid,
-                                    selectedSale.paid_price,
-                                    selectedSale.sell_price
-                                  );
-                                  // Refetch sales data after update
-                                  const updatedSales = await fetchSalesWithProduct();
-                                  setSales(updatedSales);
-                                  // Update selectedSale in modal
-                                  const updated = updatedSales.find(s => s.id === selectedSale.id);
-                                  if (updated) setSelectedSale({ ...selectedSale, ...updated });
-                                } catch (err) {
-                                  alert('Failed to update payment status: ' + (err.message || err));
-                                } finally {
-                                  setUpdatingPaymentId(null);
-                                }
-                              }}
-                              className="form-checkbox h-5 w-5 text-green-600"
-                            />
-                            <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedSale.is_fully_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        <div className="flex items-center gap-3 mt-3">
+                          <label htmlFor="payment-toggle-desktop" className="flex items-center cursor-pointer">
+                            <div className="relative">
+                              <input
+                                id="payment-toggle-desktop"
+                                type="checkbox"
+                                className="sr-only"
+                                checked={selectedSale.is_fully_paid}
+                                disabled={updatingPaymentId === selectedSale.id}
+                                onChange={async () => {
+                                  setUpdatingPaymentId(selectedSale.id);
+                                  try {
+                                    await updateSellPaymentStatus(
+                                      selectedSale.id,
+                                      !selectedSale.is_fully_paid,
+                                      selectedSale.paid_price,
+                                      selectedSale.sell_price
+                                    );
+                                    const updatedSales = await fetchSalesWithProduct();
+                                    setSales(updatedSales);
+                                    const updated = updatedSales.find(s => s.id === selectedSale.id);
+                                    if (updated) setSelectedSale({ ...selectedSale, ...updated });
+                                  } catch (err) {
+                                    alert('Failed to update payment status: ' + (err.message || err));
+                                  } finally {
+                                    setUpdatingPaymentId(null);
+                                  }
+                                }}
+                              />
+                              <div className={`block ${selectedSale.is_fully_paid ? 'bg-green-500' : 'bg-gray-300'} w-14 h-8 rounded-full transition`}></div>
+                              <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${selectedSale.is_fully_paid ? 'translate-x-full border-green-500' : 'border-gray-300'}`}></div>
+                            </div>
+                            <span className={`ml-3 text-sm font-medium ${selectedSale.is_fully_paid ? 'text-green-800' : 'text-yellow-800'}`}>
                               {selectedSale.is_fully_paid ? 'Paid' : 'Pending'}
                             </span>
-                            {updatingPaymentId === selectedSale.id && (
-                              <svg className="ml-2 h-4 w-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="4" className="opacity-25"/><path d="M4 12a8 8 0 018-8" strokeWidth="4" className="opacity-75"/></svg>
-                            )}
                           </label>
+                          {updatingPaymentId === selectedSale.id && (
+                            <svg className="h-5 w-5 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="#E5E7EB" strokeWidth="4"/><path d="M4 12a8 8 0 018-8" stroke="#3B82F6" strokeWidth="4"/></svg>
+                          )}
                         </div>
                       </div>
                     )}
@@ -995,7 +1019,7 @@ const SalesTransactions = () => {
 
                             {!selectedSale.isTrade && (
                               <div className="border-t border-gray-200 pt-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Info</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
                                 <div className="flex items-center gap-4 mb-2">
                                   <span className="text-sm text-gray-500">Paid Price:</span>
                                   <span className="text-sm font-medium text-gray-900">{selectedSale.paid_price?.toFixed(2) || '0.00'} MAD</span>
@@ -1004,42 +1028,45 @@ const SalesTransactions = () => {
                                   <span className="text-sm text-gray-500">Rest Price:</span>
                                   <span className="text-sm font-medium text-gray-900">{selectedSale.rest_price?.toFixed(2) || '0.00'} MAD</span>
                                 </div>
-                                <div className="flex items-center gap-4 mt-2">
-                                  <label className="inline-flex items-center cursor-pointer">
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedSale.is_fully_paid}
-                                      disabled={updatingPaymentId === selectedSale.id}
-                                      onChange={async () => {
-                                        setUpdatingPaymentId(selectedSale.id);
-                                        try {
-                                          await updateSellPaymentStatus(
-                                            selectedSale.id,
-                                            !selectedSale.is_fully_paid,
-                                            selectedSale.paid_price,
-                                            selectedSale.sell_price
-                                          );
-                                          // Refetch sales data after update
-                                          const updatedSales = await fetchSalesWithProduct();
-                                          setSales(updatedSales);
-                                          // Update selectedSale in modal
-                                          const updated = updatedSales.find(s => s.id === selectedSale.id);
-                                          if (updated) setSelectedSale({ ...selectedSale, ...updated });
-                                        } catch (err) {
-                                          alert('Failed to update payment status: ' + (err.message || err));
-                                        } finally {
-                                          setUpdatingPaymentId(null);
-                                        }
-                                      }}
-                                      className="form-checkbox h-5 w-5 text-green-600"
-                                    />
-                                    <span className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedSale.is_fully_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                <div className="flex items-center gap-3 mt-3">
+                                  <label htmlFor="payment-toggle-mobile" className="flex items-center cursor-pointer">
+                                    <div className="relative">
+                                      <input
+                                        id="payment-toggle-mobile"
+                                        type="checkbox"
+                                        className="sr-only"
+                                        checked={selectedSale.is_fully_paid}
+                                        disabled={updatingPaymentId === selectedSale.id}
+                                        onChange={async () => {
+                                          setUpdatingPaymentId(selectedSale.id);
+                                          try {
+                                            await updateSellPaymentStatus(
+                                              selectedSale.id,
+                                              !selectedSale.is_fully_paid,
+                                              selectedSale.paid_price,
+                                              selectedSale.sell_price
+                                            );
+                                            const updatedSales = await fetchSalesWithProduct();
+                                            setSales(updatedSales);
+                                            const updated = updatedSales.find(s => s.id === selectedSale.id);
+                                            if (updated) setSelectedSale({ ...selectedSale, ...updated });
+                                          } catch (err) {
+                                            alert('Failed to update payment status: ' + (err.message || err));
+                                          } finally {
+                                            setUpdatingPaymentId(null);
+                                          }
+                                        }}
+                                      />
+                                      <div className={`block ${selectedSale.is_fully_paid ? 'bg-green-500' : 'bg-gray-300'} w-14 h-8 rounded-full transition`}></div>
+                                      <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition ${selectedSale.is_fully_paid ? 'translate-x-full border-green-500' : 'border-gray-300'}`}></div>
+                                    </div>
+                                    <span className={`ml-3 text-sm font-medium ${selectedSale.is_fully_paid ? 'text-green-800' : 'text-yellow-800'}`}>
                                       {selectedSale.is_fully_paid ? 'Paid' : 'Pending'}
                                     </span>
-                                    {updatingPaymentId === selectedSale.id && (
-                                      <svg className="ml-2 h-4 w-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="4" className="opacity-25"/><path d="M4 12a8 8 0 018-8" strokeWidth="4" className="opacity-75"/></svg>
-                                    )}
                                   </label>
+                                  {updatingPaymentId === selectedSale.id && (
+                                    <svg className="h-5 w-5 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="#E5E7EB" strokeWidth="4"/><path d="M4 12a8 8 0 018-8" stroke="#3B82F6" strokeWidth="4"/></svg>
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -1106,14 +1133,21 @@ const SalesTransactions = () => {
                           </div>
                         </div>
                       </div>
-
-                    
+                      <div className="border-t border-gray-200 px-4 py-4 sm:px-6">
+                      <button
+                        type="button"
+                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                        onClick={closeModal}
+                      >
+                        {t('sales_transactions.details.close')}
+                      </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         </>
       )}
     </div>

@@ -14,6 +14,7 @@ import AdminProductDetail from "./pages/Product";
 import SalesTransactions from "./pages/SalesTransactions";
 import TradeFlow from "./pages/TradeFlow";
 import ExternalTradeFlow from "./pages/ExternalTradeFlow";
+import Expenses from "./pages/Expenses";
 import Home from "./pages/Home";
 import ResetPassword from "./pages/ResetPassword";
 import i18n from "./i18n";
@@ -110,6 +111,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ExternalTradeFlow />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/expenses"
+        element={
+          <ProtectedRoute>
+            <Expenses />
           </ProtectedRoute>
         }
       />

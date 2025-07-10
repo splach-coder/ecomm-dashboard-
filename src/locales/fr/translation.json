@@ -486,5 +486,41 @@
       "trade_failed": "Échec de l'échange. Veuillez réessayer",
       "trade_completed": "Échange externe terminé avec succès !"
     }
+  }, "expenses": {
+    "header": {
+      "title": "Suivi des Dépenses"
+    },
+    "summary": {
+      "total_this_month": "Total dépensé ce mois-ci"
+    },
+    "form": {
+      "add_expense": "Ajouter une nouvelle dépense",
+      "title": "Titre",
+      "title_placeholder": "ex., Courses, Dîner avec des amis",
+      "amount": "Montant",
+      "amount_placeholder": "ex., 50.00",
+      "category": "Catégorie",
+      "select_category": "Sélectionner une catégorie",
+      "notes": "Notes",
+      "notes_placeholder": "Notes facultatives sur la dépense",
+      "save_expense": "Enregistrer la dépense",
+      "error_required_fields": "Veuillez remplir tous les champs obligatoires (Titre, Montant, Catégorie)."
+    },
+    "categories": {
+      "food": "Alimentation",
+      "transport": "Transport",
+      "housing": "Logement",
+      "entertainment": "Divertissement",
+      "utilities": "Charges",
+      "health": "Santé",
+      "education": "Éducation",
+      "shopping": "Shopping",
+      "other": "Autre"
+    },
+    "recent": {
+      "title": "Dépenses Récentes",
+      "no_expenses": "Aucune dépense enregistrée pour le moment. Ajoutez-en une ci-dessus !",
+      "delete_expense": "Supprimer la dépense"
+    }
   }
 }

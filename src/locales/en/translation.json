@@ -486,5 +486,41 @@
       "trade_failed": "Trade failed. Please try again",
       "trade_completed": "External trade completed successfully!"
     }
+  },"expenses": {
+    "header": {
+      "title": "Expenses Tracker"
+    },
+    "summary": {
+      "total_this_month": "Total spent this month"
+    },
+    "form": {
+      "add_expense": "Add New Expense",
+      "title": "Title",
+      "title_placeholder": "e.g., Groceries, Dinner with friends",
+      "amount": "Amount",
+      "amount_placeholder": "e.g., 50.00",
+      "category": "Category",
+      "select_category": "Select a category",
+      "notes": "Notes",
+      "notes_placeholder": "Optional notes about the expense",
+      "save_expense": "Save Expense",
+      "error_required_fields": "Please fill in all required fields (Title, Amount, Category)."
+    },
+    "categories": {
+      "food": "Food",
+      "transport": "Transport",
+      "housing": "Housing",
+      "entertainment": "Entertainment",
+      "utilities": "Utilities",
+      "health": "Health",
+      "education": "Education",
+      "shopping": "Shopping",
+      "other": "Other"
+    },
+    "recent": {
+      "title": "Recent Expenses",
+      "no_expenses": "No expenses recorded yet. Add one above!",
+      "delete_expense": "Delete Expense"
+    }
   }
 }
