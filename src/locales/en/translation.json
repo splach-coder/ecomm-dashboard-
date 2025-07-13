@@ -31,6 +31,10 @@
     "navigation": "Navigation"
   },
   "labels": {
+    "reparation": "Mobile Reparation",
+    "reparationDescription": "Fix your phone or list repair services",
+    "expenses": "Expenses Tracker",
+    "expensesDescription": "Track and manage your expenses",
     "websiteLogo": "website logo",
     "noAccount": "Don't have an account?",
     "contactOwner": "Please contact the owner",

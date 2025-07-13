@@ -31,6 +31,10 @@
     "navigation": "Navigation"
   },
   "labels": {
+    "reparation": "Réparation Mobile",
+    "reparationDescription": "Réparez votre téléphone ou proposez un service",
+    "expenses": "Suivi des Dépenses",
+    "expensesDescription": "Suivez et gérez vos dépenses",
     "websiteLogo": "logo du site web",
     "noAccount": "Vous n'avez pas de compte ?",
     "contactOwner": "Veuillez contacter le propriétaire",

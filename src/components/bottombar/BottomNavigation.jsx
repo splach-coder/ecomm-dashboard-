@@ -9,6 +9,8 @@ import {
   ShoppingCart,
   DollarSign,
   MonitorSmartphone,
+  Wrench,
+  Wallet,
 } from "lucide-react";
 
 const BottomNavigation = ({ activeItem }) => {
@@ -83,19 +85,19 @@ const BottomNavigation = ({ activeItem }) => {
           <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
 
           <div className="space-y-4">
-          <button
+            <button
               onClick={() => handleNavigation("/reparation")}
               className="w-full flex items-center gap-4 p-4 bg-orange-50 hover:bg-orange-100 rounded-2xl transition-colors duration-200"
             >
               <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center">
-                <DollarSign size={24} className="text-white" />
+                <Wrench size={24} className="text-white" />
               </div>
               <div className="text-left">
                 <h3 className="font-semibold text-gray-800">
-                  {t("labels.tradeProductExternal")}
+                  {t("labels.reparation")}
                 </h3>
                 <p className="text-sm text-gray-600">
-                  {t("labels.tradeProductDescription")}
+                  {t("labels.reparationDescription")}
                 </p>
               </div>
             </button>
@@ -105,14 +107,14 @@ const BottomNavigation = ({ activeItem }) => {
               className="w-full flex items-center gap-4 p-4 bg-yellow-50 hover:bg-yellow-100 rounded-2xl transition-colors duration-200"
             >
               <div className="w-12 h-12 bg-yellow-600 rounded-full flex items-center justify-center">
-                <DollarSign size={24} className="text-white" />
+                <Wallet size={24} className="text-white" />
               </div>
               <div className="text-left">
                 <h3 className="font-semibold text-gray-800">
-                  {t("labels.tradeProductExternal")}
+                  {t("labels.expenses")}
                 </h3>
                 <p className="text-sm text-gray-600">
-                  {t("labels.tradeProductDescription")}
+                  {t("labels.expensesDescription")}
                 </p>
               </div>
             </button>
