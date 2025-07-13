@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
-import { fetchSalesWithProduct, fetchTradesWithProducts, updateSellPaymentStatus } from "../features/updateProductStock";
+import { fetchSalesWithProduct, fetchTradesWithProducts, updateSellPaymentStatus, deleteSale } from "../features/updateProductStock";
 import { useAuth } from '../features/auth/AuthContext';
 import Sidebar from '../components/sidebar/Sidebar';
 import BottomNavigation from '../components/bottombar/BottomNavigation';
@@ -222,6 +222,19 @@ const SalesTransactions = () => {
     }
   };
 
+  // Delete sale handler
+  const handleDeleteSale = async (saleId) => {
+    if (!window.confirm(t('sales_transactions.delete_confirm') || 'Are you sure you want to delete this sale?')) return;
+    try {
+      await deleteSale(saleId);
+      const updatedSales = await fetchSalesWithProduct();
+      setSales(updatedSales);
+      closeModal();
+    } catch (err) {
+      alert(t('sales_transactions.delete_error') + ': ' + (err.message || err));
+    }
+  };
+
   // Transaction type tag component
   const TransactionTypeTag = ({ type }) => {
     const isTrade = type === 'trade';
@@ -364,7 +377,7 @@ const SalesTransactions = () => {
                 <label htmlFor="search-query" className="block text-sm font-medium text-gray-700 mb-1">
                   {t('sales_transactions.search_label')}
                 </label>
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none pb-1">
+                <div className="absolute top-[49.5%] left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                   </svg>
@@ -900,6 +913,16 @@ const SalesTransactions = () => {
                   >
                     {t('sales_transactions.details.close')}
                   </button>
+                  {/* Delete button for sales only */}
+                  {!selectedSale.isTrade && (
+                    <button
+                      type="button"
+                      className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mr-3 sm:w-auto sm:text-sm"
+                      onClick={() => handleDeleteSale(selectedSale.id)}
+                    >
+                      {t('sales_transactions.details.delete') || 'Delete'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -922,16 +945,28 @@ const SalesTransactions = () => {
                             ? t('sales_transactions.details.title.trade') 
                             : t('sales_transactions.details.title.sale')}
                         </h2>
-                        <button
-                          type="button"
-                          className="-mr-2 p-2 text-gray-400 hover:text-gray-500"
-                          onClick={closeModal}
-                        >
-                          <span className="sr-only">Close panel</span>
-                          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
+                        <div className="flex gap-2">
+                          {/* Delete button for sales only (mobile) */}
+                          {!selectedSale.isTrade && (
+                            <button
+                              type="button"
+                              className="p-2 text-red-600 hover:text-red-800 border border-red-200 rounded"
+                              onClick={() => handleDeleteSale(selectedSale.id)}
+                            >
+                              {t('sales_transactions.details.delete') || 'Delete'}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className="-mr-2 p-2 text-gray-400 hover:text-gray-500"
+                            onClick={closeModal}
+                          >
+                            <span className="sr-only">Close panel</span>
+                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
 
                       <div className="mt-8">
@@ -1133,15 +1168,7 @@ const SalesTransactions = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="border-t border-gray-200 px-4 py-4 sm:px-6">
-                      <button
-                        type="button"
-                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
-                        onClick={closeModal}
-                      >
-                        {t('sales_transactions.details.close')}
-                      </button>
-                      </div>
+                      
                     </div>
                   </div>
                 </div>

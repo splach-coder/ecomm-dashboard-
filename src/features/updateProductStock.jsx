@@ -144,4 +144,13 @@ async function fetchTradesWithProducts() {
   }));
 }
 
-export {updateProductStock, fetchSalesWithProduct, fetchTradesWithProducts, updateSellPaymentStatus}
+// Delete a sale by id
+async function deleteSale(saleId) {
+  const { error } = await supabase
+    .from("sells")
+    .delete()
+    .eq("id", saleId);
+  if (error) throw error;
+}
+
+export {updateProductStock, fetchSalesWithProduct, fetchTradesWithProducts, updateSellPaymentStatus, deleteSale}

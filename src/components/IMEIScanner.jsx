@@ -13,44 +13,59 @@ const IMEIScanner = ({ onScanned, onClose }) => {
 
     const startScanner = async () => {
       try {
-        setLog("Starting camera in 3 seconds...");
-        await new Promise((r) => setTimeout(r, 3000)); // 3 sec delay
+        setLog("🔧 Initializing scanner...");
+
+        await new Promise((r) => setTimeout(r, 1000)); // Short delay for UX
 
         if (!videoRef.current) {
-          setLog("Video element not ready");
+          setLog("❌ Video element not ready");
           return;
         }
 
-        setLog("Accessing camera...");
         setScanning(true);
+        setLog("📷 Accessing camera...");
 
         const videoInputDevices = await codeReader.current.listVideoInputDevices();
-        const backCamera = videoInputDevices.find(device =>
+        const backCamera = videoInputDevices.find((device) =>
           device.label.toLowerCase().includes("back") ||
           device.label.toLowerCase().includes("rear")
         ) || videoInputDevices[0];
+
+        if (!backCamera) {
+          setLog("❌ No camera found");
+          return;
+        }
+
+        setLog(`✅ Using camera: ${backCamera.label}`);
 
         await codeReader.current.decodeFromVideoDevice(
           backCamera.deviceId,
           videoRef.current,
           (result, err) => {
             if (result && !scanned) {
+              const code = result.getText();
               setScanned(true);
-              setLog(`Scanned IMEI: ${result.getText()}`);
-              onScanned(result.getText());
-              // If you want to keep scanning after first scan, comment out the next line:
+              setLog(`✅ Scanned IMEI: ${code}`);
+              onScanned(code);
               codeReader.current.reset();
               setScanning(false);
-            }
-            else if (err && !(err.name === "NotFoundException")) {
-              setLog(`Error: ${err.message}`);
+            } else if (err && err.name !== "NotFoundException") {
+              setLog(`⚠️ Error: ${err.message}`);
             } else {
-              setLog("Scanning...");
+              setLog("🔍 Scanning...");
+            }
+          },
+          {
+            video: {
+              facingMode: { exact: "environment" },
+              width: { ideal: 1920 },
+              height: { ideal: 1080 }
             }
           }
         );
       } catch (e) {
-        setLog(`Camera error: ${e.message}`);
+        console.error(e);
+        setLog(`❌ Camera error: ${e.message}`);
       }
     };
 
@@ -59,13 +74,14 @@ const IMEIScanner = ({ onScanned, onClose }) => {
     return () => {
       if (codeReader.current) {
         codeReader.current.reset();
-        setScanning(false);
       }
+      setScanning(false);
     };
   }, [onScanned, scanned]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex flex-col items-center justify-center p-4">
+      {/* Close button */}
       <div className="absolute top-4 right-4">
         <button
           onClick={() => {
@@ -80,6 +96,7 @@ const IMEIScanner = ({ onScanned, onClose }) => {
         </button>
       </div>
 
+      {/* Camera Preview */}
       <div className="relative w-full max-w-lg aspect-video rounded-xl overflow-hidden shadow-lg border-4 border-green-500">
         <video
           ref={videoRef}
@@ -88,11 +105,15 @@ const IMEIScanner = ({ onScanned, onClose }) => {
           playsInline
           autoPlay
         />
+        {/* Scanner Box Overlay */}
         <div className="absolute inset-0 border-4 border-dashed border-white rounded-md pointer-events-none" />
       </div>
 
-      <p className="text-white mt-6">Align the IMEI barcode inside the box</p>
-      <p className="text-white mt-2 text-sm break-words">{log}</p>
+      {/* Log Texts */}
+      <div className="text-white mt-6 w-full max-w-lg text-center">
+        <p className="text-lg font-semibold">📦 Align the IMEI barcode inside the box</p>
+        <p className="text-sm mt-2 break-words whitespace-pre-wrap">{log}</p>
+      </div>
     </div>
   );
 };

@@ -63,7 +63,7 @@
       "year": "1 Year"
     },
     "categories": {
-      "Phone": "Phones",
+      "Téléphone": "Phones",
       "accessories": "Accessories",
       "Monitor": "Monitor"
     },
@@ -253,6 +253,9 @@
     "end_date": "End Date",
     "clear_filters": "Clear Filters",
     "showing_results": "Showing {{count}} of {{total}} transactions",
+    "status_filter": "Filter by Status",
+    "search_placeholder": "Search by customer, ID, or reference...",
+    "search_label": "Search Transactions",
     "no_transactions": {
       "title": "No transactions",
       "description": "You haven't made any transactions yet.",
@@ -292,8 +295,11 @@
       "user_paid": "User Paid",
       "trade_value": "Trade Value",
       "transaction_id": "Transaction ID",
-      "close": "Close"
+      "close": "Close",
+      "delete": "Delete"
     },
+    "delete_confirm": "Are you sure you want to delete this sale? This action cannot be undone.",
+    "delete_error": "Failed to delete the sale",
     "loading": "Loading transactions...",
     "error": "An error occurred while loading transactions."
   },
@@ -522,5 +528,54 @@
       "no_expenses": "No expenses recorded yet. Add one above!",
       "delete_expense": "Delete Expense"
     }
+  },
+  "header": "Repair Service",
+  "form": {
+    "title": "Add New Repair",
+    "editTitle": "Edit Repair",
+    "toggleButton": "New Repair",
+    "clientNamePlaceholder": "Client Name",
+    "clientPhonePlaceholder": "Phone Number",
+    "phoneModelPlaceholder": "Device Model",
+    "issueDescriptionPlaceholder": "Issue Description",
+    "repairCost": "Repair Cost",
+    "status": "Status",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional notes...",
+    "submitButton": "Save Repair",
+    "updateButton": "Update Repair",
+    "cancelButton": "Cancel"
+  },
+  "actions": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "markDone": "Mark as Done",
+    "deleteConfirm": "Are you sure you want to delete this repair?"
+  },
+  "details": {
+    "issue": "Issue Description",
+    "notes": "Technician Notes",
+    "noDescription": "No description provided",
+    "noNotes": "No notes available"
+  },
+  "status": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "done": "Completed"
+  },
+  "filter": {
+    "all": "All Repairs",
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "done": "Completed"
+  },
+  "notifications": {
+    "saveError": "Error saving repair. Please try again.",
+    "deleteError": "Error deleting repair. Please try again.",
+    "updateError": "Error updating repair status. Please try again."
+  },
+  "list": {
+    "emptyTitle": "No Repairs Found",
+    "emptyDescription": "Get started by adding your first repair"
   }
 }

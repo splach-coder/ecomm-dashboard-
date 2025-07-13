@@ -63,7 +63,7 @@
       "year": "1 An"
     },
     "categories": {
-      "Phone": "Téléphones",
+      "Téléphone": "Téléphones",
       "accessories": "Accessoires",
       "Monitor": "Monitor"
     },
@@ -253,6 +253,9 @@
     "end_date": "Date de fin",
     "clear_filters": "Effacer les filtres",
     "showing_results": "Affichage de {{count}} sur {{total}} transactions",
+    "status_filter": "Filtrer par statut",
+    "search_placeholder": "Rechercher par client, ID ou référence...",
+    "search_label": "Rechercher des transactions",
     "no_transactions": {
       "title": "Aucune transaction",
       "description": "Vous n'avez effectué aucune transaction pour le moment.",
@@ -522,5 +525,54 @@
       "no_expenses": "Aucune dépense enregistrée pour le moment. Ajoutez-en une ci-dessus !",
       "delete_expense": "Supprimer la dépense"
     }
+  },
+  "header": "Service de Réparation",
+  "form": {
+    "title": "Ajouter une Réparation",
+    "editTitle": "Modifier la Réparation",
+    "toggleButton": "Nouvelle Réparation",
+    "clientNamePlaceholder": "Nom du Client",
+    "clientPhonePlaceholder": "Numéro de Téléphone",
+    "phoneModelPlaceholder": "Modèle d'Appareil",
+    "issueDescriptionPlaceholder": "Description du Problème",
+    "repairCost": "Coût de Réparation",
+    "status": "Statut",
+    "notes": "Notes",
+    "notesPlaceholder": "Notes supplémentaires...",
+    "submitButton": "Enregistrer",
+    "updateButton": "Mettre à Jour",
+    "cancelButton": "Annuler"
+  },
+  "actions": {
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "markDone": "Marquer comme Terminé",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette réparation ?"
+  },
+  "details": {
+    "issue": "Description du Problème",
+    "notes": "Notes du Technicien",
+    "noDescription": "Aucune description fournie",
+    "noNotes": "Aucune note disponible"
+  },
+  "status": {
+    "pending": "En Attente",
+    "in_progress": "En Cours",
+    "done": "Terminé"
+  },
+  "filter": {
+    "all": "Toutes les Réparations",
+    "pending": "En Attente",
+    "in_progress": "En Cours",
+    "done": "Terminé"
+  },
+  "notifications": {
+    "saveError": "Erreur lors de l'enregistrement. Veuillez réessayer.",
+    "deleteError": "Erreur lors de la suppression. Veuillez réessayer.",
+    "updateError": "Erreur lors de la mise à jour du statut. Veuillez réessayer."
+  },
+  "list": {
+    "emptyTitle": "Aucune Réparation Trouvée",
+    "emptyDescription": "Commencez par ajouter votre première réparation"
   }
 }

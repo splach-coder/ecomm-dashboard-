@@ -1,7 +1,4 @@
-
-
-
-add somemodification nd updates on this code import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import supabase from "../lib/supabaseClient";
 import { useAuth } from "../features/auth/AuthContext";
@@ -9,11 +6,11 @@ import { Plus, X, Search, Filter, ChevronDown, ChevronUp, Check, Clock, AlertCir
 import Sidebar from "../components/sidebar/Sidebar";
 import BottomNavigation from "../components/bottombar/BottomNavigation";
 
-// --- Helper Functions ---
+// Helper Functions
 const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
 
-// --- Status Icons ---
+// Status Icons Component
 const StatusIcon = ({ status }) => {
   const icons = {
     pending: <Clock className="h-4 w-4" />,
@@ -26,7 +23,7 @@ const StatusIcon = ({ status }) => {
 const ReparationService = () => {
   const { t } = useTranslation();
   
-  // --- State Management ---
+  // State Management
   const [isOpen, setIsOpen] = useState(true);
   const { signOut } = useAuth();
   const [repairs, setRepairs] = useState([]);
@@ -46,12 +43,14 @@ const ReparationService = () => {
     status: 'pending', 
     notes: '',
   });
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [currentRepairId, setCurrentRepairId] = useState(null);
 
   const handleToggle = () => setIsOpen(!isOpen);
   const handleItemClick = (item) => setActiveItem(item);
   const handleLogout = () => signOut();
 
-  // --- Data Fetching ---
+  // Data Fetching
   useEffect(() => {
     fetchRepairs();
   }, []);
@@ -72,17 +71,31 @@ const ReparationService = () => {
     }
   };
 
-  // --- Event Handlers ---
+  // Form Handlers
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.from('repairs').insert([formValues]).select();
-    if (error) {
-      alert(t('notifications.addError'));
-      console.error('Error inserting data:', error.message);
-    } else {
+    
+    try {
+      if (isEditMode) {
+        // Update existing repair
+        const { error } = await supabase
+          .from('repairs')
+          .update(formValues)
+          .eq('id', currentRepairId);
+        
+        if (error) throw error;
+      } else {
+        // Create new repair
+        const { error } = await supabase.from('repairs').insert([formValues]);
+        if (error) throw error;
+      }
+      
       await fetchRepairs();
       resetForm();
       setIsFormVisible(false);
+    } catch (error) {
+      console.error('Error saving repair:', error.message);
+      alert(t('notifications.saveError'));
     }
   };
   
@@ -96,6 +109,8 @@ const ReparationService = () => {
       status: 'pending', 
       notes: '',
     });
+    setIsEditMode(false);
+    setCurrentRepairId(null);
   }
 
   const handleInputChange = (e) => {
@@ -112,7 +127,55 @@ const ReparationService = () => {
     setExpandedRepair(expandedRepair === id ? null : id);
   };
 
-  // --- Memoization and Filtering ---
+  // Repair Actions
+  const handleEdit = (repair) => {
+    setFormValues({
+      client_name: repair.client_name,
+      client_phone: repair.client_phone,
+      phone_model: repair.phone_model,
+      issue_description: repair.issue_description,
+      repair_cost: repair.repair_cost,
+      status: repair.status,
+      notes: repair.notes,
+    });
+    setCurrentRepairId(repair.id);
+    setIsEditMode(true);
+    setIsFormVisible(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm(t('actions.deleteConfirm'))) return;
+    
+    try {
+      const { error } = await supabase
+        .from('repairs')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      await fetchRepairs();
+    } catch (error) {
+      console.error('Error deleting repair:', error.message);
+      alert(t('notifications.deleteError'));
+    }
+  };
+
+  const handleMarkDone = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('repairs')
+        .update({ status: 'done' })
+        .eq('id', id);
+      
+      if (error) throw error;
+      await fetchRepairs();
+    } catch (error) {
+      console.error('Error marking repair as done:', error.message);
+      alert(t('notifications.updateError'));
+    }
+  };
+
+  // Memoization and Filtering
   const filteredRepairs = useMemo(() => {
     let result = repairs;
     
@@ -131,7 +194,7 @@ const ReparationService = () => {
     return result;
   }, [repairs, filter, searchQuery]);
 
-  // --- Status Badge Styles ---
+  // Status Badge Styles
   const statusBadgeStyle = {
     pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
     in_progress: 'bg-blue-100 text-blue-800 border-blue-200',
@@ -144,7 +207,7 @@ const ReparationService = () => {
     done: 'text-green-600',
   };
 
-  // --- Stats ---
+  // Stats Calculation
   const stats = useMemo(() => {
     const pending = repairs.filter(r => r.status === 'pending').length;
     const inProgress = repairs.filter(r => r.status === 'in_progress').length;
@@ -173,10 +236,7 @@ const ReparationService = () => {
         />
       </div>
 
-      <div className={`flex-1 overflow-hidden ${
-          isOpen ? "lg:ml-64" : "lg:ml-20"
-        } transition-all duration-300 ease-in-out`}>
-
+      <div className={`flex-1 overflow-hidden ${isOpen ? "lg:ml-64" : "lg:ml-20"} transition-all duration-300 ease-in-out`}>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 p-4 md:p-6 pb-28 md:pb-6">
           {/* Header Section */}
           <div className="mb-8">
@@ -305,12 +365,14 @@ const ReparationService = () => {
             </div>
           </div>
 
-          {/* Add New Repair Form (Modal) */}
+          {/* Add/Edit Repair Form Modal */}
           {isFormVisible && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white p-6 border-b border-gray-200 flex justify-between items-center rounded-t-3xl">
-                  <h2 className="text-2xl font-bold text-[#24333E]">{t('form.title')}</h2>
+                  <h2 className="text-2xl font-bold text-[#24333E]">
+                    {isEditMode ? t('form.editTitle') : t('form.title')}
+                  </h2>
                   <button 
                     onClick={handleCancel}
                     className="p-2 rounded-full hover:bg-gray-100 text-[#6A8DA6] hover:text-[#24333E] transition-all duration-200"
@@ -319,111 +381,145 @@ const ReparationService = () => {
                   </button>
                 </div>
                 
-                <div className="p-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-semibold text-[#24333E] mb-3">{t('form.clientNamePlaceholder')}</label>
-                      <input
-                        name="client_name"
-                        value={formValues.client_name}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200 text-[#24333E] placeholder-[#6A8DA6]"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-semibold text-[#24333E] mb-3">{t('form.clientPhonePlaceholder')}</label>
-                      <input
-                        name="client_phone"
-                        value={formValues.client_phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200 text-[#24333E] placeholder-[#6A8DA6]"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-semibold text-[#24333E] mb-3">{t('form.phoneModelPlaceholder')}</label>
-                      <input
-                        name="phone_model"
-                        value={formValues.phone_model}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200 text-[#24333E] placeholder-[#6A8DA6]"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-semibold text-[#24333E] mb-3">{t('form.repairCost')}</label>
-                      <input
-                        name="repair_cost"
-                        type="number"
-                        step="0.01"
-                        value={formValues.repair_cost}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200 text-[#24333E] placeholder-[#6A8DA6]"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-semibold text-[#24333E] mb-3">{t('form.issueDescriptionPlaceholder')}</label>
-                      <textarea
-                        name="issue_description"
-                        value={formValues.issue_description}
-                        onChange={handleInputChange}
-                        rows="4"
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200 text-[#24333E] placeholder-[#6A8DA6] resize-none"
-                      ></textarea>
-                    </div>
-                    
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-semibold text-[#24333E] mb-3">Status</label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {['pending', 'in_progress', 'done'].map((status) => (
-                          <button
-                            key={status}
-                            type="button"
-                            onClick={() => setFormValues(prev => ({ ...prev, status }))}
-                            className={`flex items-center justify-center gap-2 p-4 rounded-xl border transition-all duration-200 ${
-                              formValues.status === status 
-                                ? 'border-[#21A179] bg-[#21A179]/10 text-[#21A179]' 
-                                : 'border-gray-200 hover:bg-gray-50 text-[#24333E]'
-                            }`}
-                          >
-                            <div className={formValues.status === status ? 'text-[#21A179]' : statusIconStyle[status]}>
-                              <StatusIcon status={status} />
+                <div className="p-6 space-y-4">
+                  <form onSubmit={handleFormSubmit}>
+                    <div className="space-y-4">
+                      {/* Client Info */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('form.clientNamePlaceholder')}
+                          </label>
+                          <input
+                            name="client_name"
+                            value={formValues.client_name}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200"
+                            required
+                            placeholder={t('form.clientNamePlaceholder')}
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('form.clientPhonePlaceholder')}
+                          </label>
+                          <input
+                            name="client_phone"
+                            value={formValues.client_phone}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200"
+                            required
+                            placeholder={t('form.clientPhonePlaceholder')}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Device Info */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('form.phoneModelPlaceholder')}
+                        </label>
+                        <input
+                          name="phone_model"
+                          value={formValues.phone_model}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200"
+                          required
+                          placeholder={t('form.phoneModelPlaceholder')}
+                        />
+                      </div>
+                      
+                      {/* Repair Info */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('form.repairCost')}
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <DollarSign className="h-5 w-5 text-gray-400" />
                             </div>
-                            <span className="font-medium">{t(`status.${status}`)}</span>
-                          </button>
-                        ))}
+                            <input
+                              name="repair_cost"
+                              type="number"
+                              step="0.01"
+                              value={formValues.repair_cost}
+                              onChange={handleInputChange}
+                              className="w-full pl-10 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200"
+                              required
+                              placeholder="0.00"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('form.status')}
+                          </label>
+                          <select
+                            name="status"
+                            value={formValues.status}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200"
+                          >
+                            <option value="pending">{t('status.pending')}</option>
+                            <option value="in_progress">{t('status.in_progress')}</option>
+                            <option value="done">{t('status.done')}</option>
+                          </select>
+                        </div>
+                      </div>
+                      
+                      {/* Issue Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('form.issueDescriptionPlaceholder')}
+                        </label>
+                        <textarea
+                          name="issue_description"
+                          value={formValues.issue_description}
+                          onChange={handleInputChange}
+                          rows="3"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200"
+                          placeholder={t('form.issueDescriptionPlaceholder')}
+                        ></textarea>
+                      </div>
+                      
+                      {/* Notes */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('form.notes')}
+                        </label>
+                        <textarea
+                          name="notes"
+                          value={formValues.notes}
+                          onChange={handleInputChange}
+                          rows="2"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#21A179] focus:border-[#21A179] transition-all duration-200"
+                          placeholder={t('form.notesPlaceholder')}
+                        ></textarea>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      className="px-6 py-3 bg-white border border-gray-200 text-[#24333E] font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200"
-                    >
-                      {t('form.cancelButton')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleFormSubmit}
-                      className="px-6 py-3 bg-[#21A179] text-white font-semibold rounded-xl shadow-lg hover:bg-[#1a8a68] transform hover:-translate-y-0.5 transition-all duration-200"
-                    >
-                      {t('form.submitButton')}
-                    </button>
-                  </div>
-                </div>-200"
-                    <button>
-                      {t('form.submitButton')}
-                    </button>
-                  </div>
+                    
+                    <div className="flex justify-end gap-3 pt-6">
+                      <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-200"
+                      >
+                        {t('form.cancelButton')}
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-[#21A179] text-white font-medium rounded-lg shadow hover:bg-[#1a8a68] transition-all duration-200"
+                      >
+                        {isEditMode ? t('form.updateButton') : t('form.submitButton')}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
+            </div>
           )}
 
           {/* Repairs List */}
@@ -502,16 +598,25 @@ const ReparationService = () => {
                         </div>
                         
                         <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
-                          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#21A179] hover:bg-[#21A179]/5 rounded-lg transition-all duration-200">
+                          <button 
+                            onClick={() => handleEdit(repair)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#21A179] hover:bg-[#21A179]/5 rounded-lg transition-all duration-200"
+                          >
                             <Edit3 className="h-4 w-4" />
                             {t('actions.edit')}
                           </button>
-                          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+                          <button 
+                            onClick={() => handleDelete(repair.id)}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                          >
                             <Trash2 className="h-4 w-4" />
                             {t('actions.delete')}
                           </button>
                           {repair.status !== 'done' && (
-                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 ml-auto">
+                            <button 
+                              onClick={() => handleMarkDone(repair.id)}
+                              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 ml-auto"
+                            >
                               <CheckCircle className="h-4 w-4" />
                               {t('actions.markDone')}
                             </button>
@@ -546,13 +651,3 @@ const ReparationService = () => {
 };
 
 export default ReparationService;
-
-
-
-first i need u to redesign the form to add a reparatio to be more easy and more good ux only the form other design let it the same
-add buttons functionality 
-edit button nd delete and mark done like the reparation is done
-this should be works fine and linked to db 
-
-gave some translations of details and actions in en.json and fr,.json format
-
