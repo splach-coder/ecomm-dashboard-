@@ -1,107 +1,79 @@
-import React, { useRef, useState } from 'react';
-import Tesseract from 'tesseract.js';
+import React, { useEffect, useRef, useState } from 'react';
+import { BrowserMultiFormatReader } from '@zxing/library';
 
-const IMEICameraScanner = () => {
+const BarcodeScanner = ({ onScanned, onClose }) => {
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [imei, setIMEI] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [streamStarted, setStreamStarted] = useState(false);
+  const reader = useRef(null);
+  const [devices, setDevices] = useState([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState('');
+  const [log, setLog] = useState('Initializing...');
+  const [scanned, setScanned] = useState(false);
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { exact: 'environment' }, // Rear camera
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 30 }
-        },
-        audio: false
-      });
+  useEffect(() => {
+    reader.current = new BrowserMultiFormatReader();
 
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play();
-      setStreamStarted(true);
-    } catch (err) {
-      console.error('Camera error:', err);
-      alert('Could not access the camera. Try a different device or browser.');
-    }
-  };
+    (async () => {
+      try {
+        const all = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = all.filter(d => d.kind === 'videoinput');
+        setDevices(videoInputs);
 
-  const stopCamera = () => {
-    const stream = videoRef.current?.srcObject;
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-      setStreamStarted(false);
-    }
-  };
+        const back = videoInputs
+          .find(d =>
+            d.label.toLowerCase().includes('back') ||
+            d.label.toLowerCase().includes('rear')
+          );
+        setSelectedDeviceId((back || videoInputs[0])?.deviceId);
 
-  const captureAndScan = async () => {
-    setLoading(true);
-    setIMEI(null);
+      } catch (e) {
+        setLog(`Failed to get devices: ${e.message}`);
+      }
+    })();
 
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    return () => {
+      reader.current?.reset();
+    };
+  }, []);
 
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  useEffect(() => {
+    if (!selectedDeviceId) return;
 
-    const dataUrl = canvas.toDataURL('image/png');
-
-    try {
-      const result = await Tesseract.recognize(dataUrl, 'eng', {
-        logger: m => console.log(m)
-      });
-
-      const text = result.data.text;
-      const matches = text.match(/\d{15}/g);
-      setIMEI(matches?.[0] || 'No IMEI found');
-    } catch (err) {
-      console.error('OCR error:', err);
-      setIMEI('Error reading IMEI');
-    }
-
-    setLoading(false);
-  };
+    setLog('📷 Starting scanner...');
+    reader.current.decodeFromVideoDevice(
+      selectedDeviceId,
+      videoRef.current,
+      (result, err) => {
+        if (result && !scanned) {
+          const code = result.getText();
+          setScanned(true);
+          setLog(`✅ Scanned: ${code}`);
+          onScanned(code);
+          reader.current.reset();
+        } else if (err && err.name !== 'NotFoundException') {
+          setLog(`⚠️ ${err.message}`);
+        } else {
+          setLog('🔍 Scanning...');
+        }
+      },
+      { video: { deviceId: selectedDeviceId, facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } }
+    );
+  }, [selectedDeviceId]);
 
   return (
-    <div>
-      {!streamStarted ? (
-        <button onClick={startCamera}>📷 Start Camera</button>
-      ) : (
-        <button onClick={stopCamera}>🛑 Stop Camera</button>
-      )}
-
-      <div style={{ marginTop: 10 }}>
-        <video
-          ref={videoRef}
-          width="100%"
-          autoPlay
-          playsInline
-          muted
-          style={{ maxWidth: '100%', borderRadius: 8, border: '1px solid #ccc' }}
-        />
+    <div className="scanner-modal">
+      <button className="close-btn" onClick={() => { reader.current.reset(); onClose(); }}>✕</button>
+      <div className="picker">
+        <label>Camera:</label>
+        <select value={selectedDeviceId} onChange={e => setSelectedDeviceId(e.target.value)}>
+          {devices.map(d => <option key={d.deviceId} value={d.deviceId}>{d.label || d.deviceId}</option>)}
+        </select>
       </div>
-
-      {streamStarted && (
-        <button onClick={captureAndScan} disabled={loading} style={{ marginTop: 10 }}>
-          {loading ? '🔍 Scanning...' : '📸 Capture & Read IMEI'}
-        </button>
-      )}
-
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-      {imei && (
-        <div style={{ marginTop: 10 }}>
-          <strong>📱 IMEI:</strong> {imei}
-        </div>
-      )}
+      <video ref={videoRef} autoPlay muted playsInline style={{ width: '100%' }} />
+      <div className="log">
+        <p>{log}</p>
+      </div>
     </div>
   );
 };
 
-export default IMEICameraScanner;
+export default BarcodeScanner;

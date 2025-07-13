@@ -1,156 +1,201 @@
-import { useEffect, useRef, useState } from "react";
-import { BrowserMultiFormatReader } from "@zxing/library";
-import Tesseract from "tesseract.js";
+import React, { useState, useEffect } from 'react';
+import { QrReader } from 'react-qr-reader';
+import { Camera, Scan, CheckCircle, XCircle } from 'lucide-react';
 
-const IMEIScanner = ({ onScanned, onClose }) => {
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const codeReader = useRef(null);
-  const [log, setLog] = useState("📷 Initializing...");
-  const [scanning, setScanning] = useState(true);
-  const [scanned, setScanned] = useState(false);
+const BarcodeScanner = ({ onScanSuccess }) => {
+  const [isScannerOn, setIsScannerOn] = useState(false);
+  const [error, setError] = useState(null);
+  const [hasPermission, setHasPermission] = useState(null);
 
+  // Check camera permissions when component mounts
   useEffect(() => {
-    codeReader.current = new BrowserMultiFormatReader();
-    let fallbackTimer = null;
+    if (isScannerOn) {
+      checkCameraPermissions();
+    }
+  }, [isScannerOn]);
 
-    const startScanner = async () => {
-      try {
-        const devices = await codeReader.current.listVideoInputDevices();
-        const backCamera = devices.find(d =>
-          d.label.toLowerCase().includes("back") || d.label.toLowerCase().includes("rear")
-        ) || devices[0];
+  const checkCameraPermissions = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => track.stop());
+      setHasPermission(true);
+    } catch (err) {
+      console.error('Camera permission error:', err);
+      setHasPermission(false);
+      setError('Camera access was denied. Please enable camera permissions.');
+    }
+  };
 
-        if (!backCamera) {
-          setLog("❌ No camera device found");
-          return;
-        }
+  const handleScanResult = (result, error) => {
+    if (!!result) {
+      setIsScannerOn(false);
+      onScanSuccess(result?.text);
+    }
 
-        setLog("✅ Rear camera selected: " + backCamera.label);
-
-        await codeReader.current.decodeFromVideoDevice(
-          backCamera.deviceId,
-          videoRef.current,
-          (result, err) => {
-            if (result && !scanned) {
-              const code = result.getText();
-              setScanned(true);
-              setScanning(false);
-              setLog(`✅ Barcode found: ${code}`);
-              codeReader.current.reset();
-              onScanned(code);
-            } else if (err && err.name !== "NotFoundException") {
-              setLog(`⚠️ Barcode Error: ${err.message}`);
-            } else {
-              setLog("🔍 Scanning for barcode...");
-            }
-          },
-          {
-            video: {
-              facingMode: { exact: "environment" },
-              width: { ideal: 1920 },
-              height: { ideal: 1080 }
-            }
-          }
-        );
-
-        // Fallback to OCR after 5 sec if barcode fails
-        fallbackTimer = setTimeout(() => {
-          if (!scanned) {
-            setLog("⏱️ Barcode not found. Falling back to OCR...");
-            fallbackToOCR();
-          }
-        }, 5000);
-      } catch (e) {
-        console.error("Camera error", e);
-        setLog("❌ Failed to access camera: " + e.message);
+    if (!!error) {
+      const ignorableErrors = [
+        'NotFoundException',
+        'ChecksumException',
+        'FormatException'
+      ];
+      
+      if (!ignorableErrors.includes(error.name)) {
+        console.error('Scanner error:', error);
+        setError('An error occurred while scanning. Please try again.');
       }
-    };
+    }
+  };
 
-    const fallbackToOCR = async () => {
-      try {
-        if (!videoRef.current || !canvasRef.current) {
-          setLog("❌ Video or canvas not ready");
-          return;
-        }
+  const startScanner = () => {
+    setError(null);
+    setIsScannerOn(true);
+  };
 
-        const canvas = canvasRef.current;
-        const video = videoRef.current;
+  if (isScannerOn) {
+    if (hasPermission === false) {
+      return (
+        <div className="w-full max-w-md mx-auto bg-slate-800 rounded-2xl shadow-2xl p-6 space-y-6">
+          <div className="bg-red-900/50 p-4 rounded-lg">
+            <h2 className="text-lg font-semibold text-red-400 flex items-center">
+              <XCircle className="mr-2" />
+              Camera Access Denied
+            </h2>
+            <p className="text-slate-300 mt-2">
+              Please enable camera permissions in your browser settings.
+            </p>
+            <button
+              onClick={() => setIsScannerOn(false)}
+              className="mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      );
+    }
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        const imageData = canvas.toDataURL("image/png");
-
-        const { data: { text } } = await Tesseract.recognize(imageData, "eng", {
-          logger: (m) => console.log(m)
-        });
-
-        const matches = text.match(/\d{15}/g); // Find 15-digit IMEI
-        if (matches && matches[0]) {
-          setLog(`✅ OCR IMEI: ${matches[0]}`);
-          setScanned(true);
-          setScanning(false);
-          codeReader.current.reset();
-          onScanned(matches[0]);
-        } else {
-          setLog("❌ OCR failed to find IMEI");
-        }
-      } catch (e) {
-        console.error("OCR error", e);
-        setLog("❌ OCR Error: " + e.message);
-      }
-    };
-
-    startScanner();
-
-    return () => {
-      if (codeReader.current) codeReader.current.reset();
-      if (fallbackTimer) clearTimeout(fallbackTimer);
-      setScanning(false);
-    };
-  }, [onScanned, scanned]);
+    return (
+      <div className="w-full max-w-md mx-auto bg-slate-800 rounded-2xl shadow-2xl p-6 space-y-6">
+        <div className="relative w-full aspect-square bg-slate-900 rounded-lg overflow-hidden shadow-inner">
+          <QrReader
+            onResult={handleScanResult}
+            constraints={{
+              facingMode: 'environment',
+              aspectRatio: 1
+            }}
+            scanDelay={300}
+            videoContainerStyle={{
+              width: '100%',
+              height: '100%',
+              paddingTop: '0',
+              position: 'relative'
+            }}
+            videoStyle={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: hasPermission ? 'block' : 'none'
+            }}
+            ViewFinder={() => (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-2/3 h-2/3 border-4 border-dashed border-cyan-400 rounded-lg animate-pulse"></div>
+              </div>
+            )}
+          />
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+            <button 
+              onClick={() => setIsScannerOn(false)} 
+              className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition-all duration-300 shadow-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+        
+        {error && (
+          <div className="bg-red-900/50 p-4 rounded-lg mt-4 animate-fade-in">
+            <h2 className="text-lg font-semibold text-red-400 flex items-center">
+              <XCircle className="mr-2" />
+              Error
+            </h2>
+            <p className="text-slate-300 mt-2 break-words">
+              {error}
+            </p>
+          </div>
+        )}
+        
+        {hasPermission === null && (
+          <div className="text-center text-slate-400">
+            <p>Loading camera...</p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex flex-col items-center justify-center p-4">
-      {/* Close Button */}
-      <div className="absolute top-4 right-4">
-        <button
-          onClick={() => {
-            codeReader.current?.reset();
-            onClose();
-          }}
-          className="text-white text-xl font-bold px-4 py-2 bg-red-600 rounded hover:bg-red-700"
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* Camera Preview */}
-      <div className="relative w-full max-w-lg aspect-video rounded-xl overflow-hidden shadow-lg border-4 border-green-500">
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover"
-          muted
-          playsInline
-          autoPlay
-        />
-        <div className="absolute inset-0 border-4 border-dashed border-white rounded-md pointer-events-none" />
-      </div>
-
-      {/* Canvas (hidden for OCR fallback) */}
-      <canvas ref={canvasRef} style={{ display: "none" }} />
-
-      {/* Logs */}
-      <div className="text-white mt-6 w-full max-w-lg text-center">
-        <p className="text-lg font-semibold">📲 Align the IMEI with the box</p>
-        <p className="text-sm mt-2 break-words whitespace-pre-wrap">{log}</p>
-      </div>
+    <div className="flex flex-col items-center justify-center space-y-4 w-full max-w-md mx-auto">
+      <button
+        onClick={startScanner}
+        className="flex items-center justify-center w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-4 px-6 rounded-lg text-lg transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg"
+      >
+        <Camera className="mr-2 h-6 w-6" />
+        Start Scanner
+      </button>
     </div>
   );
 };
 
-export default IMEIScanner;
+export default function App() {
+  const [scannedData, setScannedData] = useState(null);
+
+  const handleScanSuccess = (data) => {
+    const imeiRegex = /^\d{15}$/;
+    const cleanData = data.trim();
+    
+    if (imeiRegex.test(cleanData)) {
+      setScannedData(cleanData);
+    } else {
+      alert('Invalid IMEI format. Please scan a valid 15-digit IMEI barcode.');
+    }
+  };
+
+  return (
+    <div className="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-4 font-sans">
+      <div className="w-full max-w-md mx-auto bg-slate-800 rounded-2xl shadow-2xl p-6 space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-cyan-400 flex items-center justify-center">
+            <Scan className="mr-3 h-8 w-8" />
+            IMEI Scanner App
+          </h1>
+          <p className="text-slate-400 mt-2">
+            Use the scanner below to capture the IMEI barcode.
+          </p>
+        </div>
+
+        {!scannedData ? (
+          <BarcodeScanner onScanSuccess={handleScanSuccess} />
+        ) : (
+          <div className="bg-slate-700 p-4 rounded-lg mt-4 animate-fade-in">
+            <h2 className="text-lg font-semibold text-cyan-400 flex items-center">
+              <CheckCircle className="mr-2 text-green-400" />
+              Scan Successful
+            </h2>
+            <p className="text-slate-300 mt-2 break-words">
+              <strong>Scanned IMEI:</strong> {scannedData}
+            </p>
+            <button
+              onClick={() => setScannedData(null)}
+              className="mt-4 w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-2 px-4 rounded-lg transition-all"
+            >
+              Scan Another
+            </button>
+          </div>
+        )}
+      </div>
+      <footer className="text-center text-slate-500 mt-8">
+        <p>Powered by react-qr-reader</p>
+      </footer>
+    </div>
+  );
+}

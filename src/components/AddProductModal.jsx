@@ -4,7 +4,7 @@ import supabase from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import imageCompression from "browser-image-compression";
 import { useTranslation } from "react-i18next";
-import IMEIScanner from "./IMEIScanner";
+import BarcodeScanner from "./IMEIReader";
 
 const BRANDS = [
   "Apple",
@@ -50,6 +50,7 @@ const AddProductModal = ({ showAddModal, setShowAddModal }) => {
   const videoRef = useRef(null);
   const navigate = useNavigate();
   const [showReader, setShowReader] = useState(false);
+  const [code, setCode] = useState('');
   const handleClick = () => setShowReader(true);
 
   useEffect(() => {
@@ -273,9 +274,11 @@ const AddProductModal = ({ showAddModal, setShowAddModal }) => {
 
       {showReader && (
         <div className="fixed inset-0 bg-black z-50 flex flex-col" style={{ marginTop: 20 }}>
-          <IMEIScanner />
+          {code && <p>Result: {code}</p>}
+          <BarcodeScanner onScanned={c => { setCode(c); setOpen(false); }} onClose={() => setOpen(false)} />
         </div>
       )}
+
 
       {/* Camera View */}
       {showCamera && (
