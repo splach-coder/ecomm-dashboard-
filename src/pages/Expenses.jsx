@@ -211,7 +211,7 @@ const Expenses = () => {
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tumbleweed focus:ring-tumbleweed sm:text-sm"
+                  className="px-3 py-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tumbleweed focus:ring-tumbleweed sm:text-sm"
                   placeholder={t('expenses.form.title_placeholder')}
                   disabled={loading}
                 />
@@ -225,7 +225,7 @@ const Expenses = () => {
                   id="amount"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tumbleweed focus:ring-tumbleweed sm:text-sm"
+                  className="px-3 py-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tumbleweed focus:ring-tumbleweed sm:text-sm"
                   placeholder={t('expenses.form.amount_placeholder')}
                   step="0.01"
                   disabled={loading}
@@ -239,7 +239,7 @@ const Expenses = () => {
                   id="category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tumbleweed focus:ring-tumbleweed sm:text-sm"
+                  className="px-3 py-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tumbleweed focus:ring-tumbleweed sm:text-sm"
                   disabled={loading}
                 >
                   <option value="">{t('expenses.form.select_category')}</option>
@@ -257,7 +257,7 @@ const Expenses = () => {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows="3"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tumbleweed focus:ring-tumbleweed sm:text-sm"
+                  className="px-3 py-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-tumbleweed focus:ring-tumbleweed sm:text-sm"
                   placeholder={t('expenses.form.notes_placeholder')}
                   disabled={loading}
                 ></textarea>
