@@ -31,9 +31,9 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: 'Yassir Phones - Barcode Scanner',
+        name: 'Yassir Phones',
         short_name: 'Yassir Phones',
-        description: 'Professional barcode and IMEI scanner for mobile devices',
+        description: '',
         start_url: '/',
         display: 'standalone',
         background_color: '#000000',
