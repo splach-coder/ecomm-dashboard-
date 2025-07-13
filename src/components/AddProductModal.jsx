@@ -4,7 +4,6 @@ import supabase from "../lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import imageCompression from "browser-image-compression";
 import { useTranslation } from "react-i18next";
-import BarcodeScanner from "./IMEIReader";
 
 const BRANDS = [
   "Apple",
@@ -49,9 +48,6 @@ const AddProductModal = ({ showAddModal, setShowAddModal }) => {
   const [showCamera, setShowCamera] = useState(false);
   const videoRef = useRef(null);
   const navigate = useNavigate();
-  const [showReader, setShowReader] = useState(false);
-  const [code, setCode] = useState('');
-  const handleClick = () => setShowReader(true);
 
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
@@ -270,15 +266,6 @@ const AddProductModal = ({ showAddModal, setShowAddModal }) => {
         showAddModal ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
     >
-      
-
-      {showReader && (
-        <div className="fixed inset-0 bg-black z-50 flex flex-col" style={{ marginTop: 20 }}>
-          {code && <p>Result: {code}</p>}
-          <BarcodeScanner onScanned={c => { setCode(c); setOpen(false); }} onClose={() => setOpen(false)} />
-        </div>
-      )}
-
 
       {/* Camera View */}
       {showCamera && (
@@ -331,8 +318,6 @@ const AddProductModal = ({ showAddModal, setShowAddModal }) => {
             <X size={20} />
           </button>
         </div>
-
-        <button onClick={handleClick} className="bg-red-500 p-2">📷 Scan IMEI</button>
 
         {/* Body */}
         <div className="p-6 overflow-y-auto max-h-[70vh]">
