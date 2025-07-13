@@ -10,7 +10,6 @@ import {
   DollarSign,
   MonitorSmartphone,
 } from "lucide-react";
-import IMEIScanner from "../IMEIScanner";
 
 const BottomNavigation = ({ activeItem }) => {
   const [showOptions, setShowOptions] = useState(false);
