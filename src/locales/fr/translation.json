@@ -299,7 +299,8 @@
       "user_paid": "Montant payé",
       "trade_value": "Valeur de l'échange",
       "transaction_id": "ID de transaction",
-      "close": "Fermer"
+      "close": "Fermer",
+      "delete" : "Supprimer"
     },
     "loading": "Chargement des transactions...",
     "error": "Une erreur s'est produite lors du chargement des transactions."
